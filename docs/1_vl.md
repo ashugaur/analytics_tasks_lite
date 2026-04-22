@@ -13,15 +13,16 @@ hide:
 
 A reference point for charts and graphs.
 
-Build visualizations leveraging code (.py, .R, .bas) with least time and effort.
+Build consistent visualizations leveraging code (.py, .R, .bas, (js, d3js)) blazingly fast.
 
 
 ### Structure
 
-Includes ready to use codebase plugged in an .html page for easy access and usage.
+Includes tested codebase to prepare simple to advance visualizations.
 
-![align_center](img/vl_screenshot_new.png){: .center style="height: 500px; width: Auto; border-radius: 5px;" loading=lazy}
+![align_center](img/vl_screenshot_new.png){: .center style="height: 600px; width: Auto; border-radius: 5px;" loading=lazy}
+
 
 ### Demo
 
-Demo in `src\analytics_tasks_lite\visual_library_demo.py`.
+Demo in `[src\analytics_tasks_lite\visual_library_demo.py](https://github.com/ashugaur/analytics_tasks_lite/blob/main/examples/slidejs.html)` (download and view).
