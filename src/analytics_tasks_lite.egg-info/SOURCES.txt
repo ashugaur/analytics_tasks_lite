@@ -149,8 +149,6 @@ src/analytics_tasks_lite/utils/scanning/scan_py_files_in_folders_for_headings.py
 src/analytics_tasks_lite/utils/scanning/scan_py_files_in_folders_for_headings_detailed.py
 src/analytics_tasks_lite/utils/scanning/scan_python_functions_from_file_s.py
 src/analytics_tasks_lite/utils/scanning/table_columns_to_markdown.py
-src/analytics_tasks_lite/visual_library/bar/__init__.py
-src/analytics_tasks_lite/visual_library/bar/bar_chart.py
 src/analytics_tasks_lite/visual_library_ao/__init__.py
 src/analytics_tasks_lite/visual_library_ao/build.py
 src/analytics_tasks_lite/visual_library_ao/visual_library_demo.py
