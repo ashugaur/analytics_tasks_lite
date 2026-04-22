@@ -1,0 +1,119 @@
+site_name: AT Lite Guide
+use_directory_urls: false
+
+theme:
+    name: material
+    palette:
+        # light mode
+        - media: "(prefers-color-scheme: light)"
+          scheme: default
+          toggle:
+            icon: material/toggle-switch
+            name: Switch to dark mode
+          accent: orange
+          primary: white
+
+        # dark mode
+        - media: "(prefers-color-scheme: dark)"
+          scheme: slate
+          toggle:
+            icon: material/toggle-switch-off-outline
+            name: Switch to light mode
+          accent: orange
+          primary: black
+    features:
+        - content.code.copy
+        - navigation.tabs
+        - navigation.tabs.sticky
+        - navigation.top
+        - navigation.footer
+        - navigation.tracking
+        - navigation.indexes
+        - content.code.annotate
+    icon:
+        logo: material/layers-outline
+
+markdown_extensions:
+    - attr_list
+    - admonition
+    - pymdownx.highlight:
+        pygments_lang_class: true
+        # auto_title: true
+        linenums: true
+        linenums_style: pymdownx-inline
+        anchor_linenums: true
+        line_spans: __span
+        pygments_lang_class: true
+    - pymdownx.details
+    - abbr
+    - footnotes
+    - tables
+    - pymdownx.tabbed:
+        alternate_style: true
+    - pymdownx.highlight:
+        anchor_linenums: true
+        line_spans: __span
+        pygments_lang_class: true
+    - pymdownx.inlinehilite
+    - pymdownx.snippets
+    - pymdownx.superfences
+    - def_list
+    - pymdownx.caret
+    - pymdownx.mark
+    - pymdownx.tilde
+    - pymdownx.critic
+    - pymdownx.tasklist:
+        custom_checkbox: true
+    - pymdownx.tabbed:
+        alternate_style: true
+    - toc:
+        title: Table of contents
+        permalink: true #enable anchor
+        # permalink: '#' #change anchor
+        permalink_title: Anchor link to this section for reference
+        toc_depth: 5
+        baselevel: 1
+    - pymdownx.superfences:
+        custom_fences:
+          - name: mermaid
+            class: mermaid
+            format: !!python/name:pymdownx.superfences.fence_code_format
+plugins:
+    - search
+    - offline:
+        enabled: !ENV [OFFLINE, true]
+
+extra_css:
+    - assets/stylesheets/extra.css
+
+
+
+## terminal
+# theme:
+#   name: terminal
+#   palette: dark
+#   features:
+#     - navigation.side.indexes
+# markdown_extensions:
+#   - toc:
+#       baselevel: "4"
+#       toc_depth: "4"
+
+
+## mkdocs
+  # name: mkdocs
+  # color_mode: auto
+  # user_color_mode_toggle: true
+  # nav_style: dark # primary | dark | light
+  # navigation_depth: 3
+  # highlightjs: true
+  # hljs_languages:
+  #   - yaml
+  #   - rust
+  # analytics:
+  #   gtag: G-ABC123
+  # shortcuts:
+  #   help: 191    # ?
+  #   next: 78     # n
+  #   previous: 80 # p
+  #   search: 83   # s

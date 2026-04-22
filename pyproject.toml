@@ -1,0 +1,76 @@
+[project]
+name = "analytics_tasks_lite"
+version = "0.1.0"
+description = "Automation including file search and slide deck preparation."
+readme = "README.md"
+requires-python = ">=3.11,<3.13"
+dependencies = [
+    "art>=6.5",
+    "pip>=25.2",
+    "bs4>=0.0.2",
+    "pandas>=3.0",
+    "docx>=0.2.4",
+    "pywin32>=310",
+    "faker>=37.4.0",
+    "pypdf2>=3.0.1",
+    "psutil>=7.0.0",
+    "numba>=0.61.0",
+    "ebooklib>=0.19",
+    "polars>=1.37.1",
+    "coloraide>=8.6",
+    "ipython>=9.10.0",
+    "pyarrow>=20.0.0",
+    "openpyxl>=3.1.5",
+    "mammoth>=1.10.0",
+    "nbformat>=5.10.4",
+    "pyperclip>=1.9.0",
+    "reportlab>=4.4.1",
+    "importlib>=1.0.4",
+    "nbclient>=0.10.2",
+    "comtypes>=1.4.16",
+    "nbconvert>=7.16.6",
+    "spellchecker>=0.4",
+    "markdownify>=1.2.0",
+    "python-docx>=1.1.2",
+    "python-pptx>=1.0.2",
+    "matplotlib>=3.10.3",
+    "matplotlib>=3.10.5",
+    "scikit-learn>=1.7.0",
+    "extract-msg>=0.54.1",
+    "xlsxwriter>=3.2.9",
+    "numpy>=2.1.0,<=2.1.3",
+    "numpy >= 2.1.0, < 3.0.0",
+]
+
+authors = [
+    {name = "AshutoshGaur", email = "ashutoshgaur@live.com"},
+]
+keywords = ["automation", "analytics", "search", "file search", "indexing", "text mining", "presentations", "slides", "vba", "office automation", "powerpoint automation", "visualization", "data processing"]
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.package-data]
+"*" = ["*.png", "*.jpg", "*.jpeg", "*.bas", "*.txt", "*.R", "*.csv", "*.xlsx", "*.xlsm", "*.jfif", '*.html', '*.json', '*.zip']
+analytics_tasks_lite = [
+    "visual_library/sankey_d3/*.html",
+    "visual_library/sankey_d3/*.json",
+]
+
+[tool.pytest.ini_options]
+pythonpath = "src"
+
+[tool.uv.sources]
+analytics-tasks-utils = { path = "../analytics_tasks_lite_utils/dist/analytics_tasks_lite_utils-0.1.0-py3-none-any.whl" }
+analytics-tasks-nlp-utils = { path = "../analytics_tasks_lite_nlp_utils/dist/analytics_tasks_lite_nlp_utils-0.1.0-py3-none-any.whl" }
+
+[project.urls]
+homepage = "https://ashugaur.github.io/analytics_tasks_lite/"
+repository = "https://github.com/ashugaur/analytics_tasks_lite.git"

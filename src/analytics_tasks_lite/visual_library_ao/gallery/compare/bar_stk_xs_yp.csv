@@ -1,0 +1,10 @@
+cat,drug,source,nbr_of_patients
+Cat 01,Drug A,New,0.2
+Cat 01,Drug A,Old,0.4
+Cat 01,Drug A,Mature,0.1
+Cat 02,Drug A,New,0.25
+Cat 02,Drug A,Old,0.35
+Cat 02,Drug A,Mature,0.15
+Cat 03,Drug A,New,0.6
+Cat 03,Drug A,Old,0.2
+Cat 03,Drug A,Mature,0.1

@@ -1,0 +1,3544 @@
+<!DOCTYPE html>
+<html lang="en" style="height: 100%">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }} 🦩</title>
+
+    <!-- ===== EMBEDDED JAVASCRIPT LIBRARIES ===== -->
+    {% if echarts_js %}
+    <script type="text/javascript">
+{{ echarts_js }}
+    </script>
+    {% endif %}
+
+    {% if d3_js %}
+    <script type="text/javascript">
+{{ d3_js }}
+    </script>
+    {% endif %}
+
+    {% if d3_sankey_js %}
+    <script type="text/javascript">
+{{ d3_sankey_js }}
+    </script>
+    {% endif %}
+
+    {% if html2canvas_js %}
+    <script type="text/javascript">
+{{ html2canvas_js }}
+    </script>
+    {% endif %}
+
+    {% if jspdf_js %}
+    <script type="text/javascript">
+{{ jspdf_js }}
+    </script>
+    {% endif %}
+
+<style>
+    /* ===== CSS VARIABLES (Theme & Fonts) ===== */
+    :root {
+        /* ── Brand / layout tokens (light mode) ── */
+        --color-primary:      {{ theme.primary }};
+        --color-text:         {{ theme.text }};
+        --color-muted:        {{ theme.muted }};
+        --color-light:        {{ theme.light }};
+        --color-footnote:     {{ theme.footnote }};
+        --content-bg:         {{ theme.content_bg }};
+        --slide-bg:           {{ theme.slide_bg }};
+        --header-border:      {{ theme.header_border }};
+
+        /* ── Semantic surface tokens (light mode) ── */
+        --color-bg-dark:      {{ theme.bg_dark }};
+        --color-bg:           {{ theme.bg }};
+        --color-bg-light:     {{ theme.bg_light }};
+        --color-text-muted:   {{ theme.text_muted }};
+        --color-highlight:    {{ theme.highlight }};
+        --color-border:       {{ theme.border }};
+        --color-border-muted: {{ theme.border_muted }};
+        --color-secondary:    {{ theme.secondary }};
+        --color-danger:       {{ theme.danger }};
+        --color-warning:      {{ theme.warning }};
+        --color-success:      {{ theme.success }};
+        --color-info:         {{ theme.info }};
+
+        /* ── OKLCH overrides (progressive enhancement) ── */
+        --color-bg-dark:      oklch(0.92 0.015 75);
+        --color-bg:           oklch(0.96 0.015 75);
+        --color-bg-light:     oklch(1 0.015 75);
+        --color-text-muted:   oklch(0.4 0.03 75);
+        --color-highlight:    oklch(1 0.03 75);
+        --color-border:       oklch(0.6 0.03 75);
+        --color-border-muted: oklch(0.7 0.03 75);
+        --color-secondary:    oklch(0.4 0.1 255);
+        --color-danger:       oklch(0.5 0.05 30);
+        --color-warning:      oklch(0.5 0.05 100);
+        --color-success:      oklch(0.5 0.05 160);
+        --color-info:         oklch(0.5 0.05 260);
+
+        /* ── Font sizes ── */
+        --font-title:                 {{ fonts.title }};
+        --font-subtitle:              {{ fonts.subtitle }};
+        --font-body:                  {{ fonts.body }};
+        --font-agenda-group-heading:  {{ fonts.agenda_group_heading }};
+        --font-agenda-item:           {{ fonts.agenda_item }};
+        --font-index-group-heading:   {{ fonts.index_group_heading }};
+        --font-index-item:            {{ fonts.index_item }};
+        --font-family:                {{ font_family }};
+    }
+
+    /* ===== DARK MODE — variable overrides only ===== */
+    body.dark-mode {
+        background-color: var(--color-bg-dark);
+
+        /* ── Brand / layout tokens (dark mode) ── */
+        --color-primary:      {{ theme_dark.primary }};
+        --color-text:         {{ theme_dark.text }};
+        --color-muted:        {{ theme_dark.muted }};
+        --color-light:        {{ theme_dark.light }};
+        --color-footnote:     {{ theme_dark.footnote }};
+        --content-bg:         {{ theme_dark.content_bg }};
+        --slide-bg:           {{ theme_dark.slide_bg }};
+        --header-border:      {{ theme_dark.header_border }};
+
+        /* ── Semantic surface tokens (dark mode) ── */
+        --color-bg-dark:      {{ theme_dark.bg_dark }};
+        --color-bg:           {{ theme_dark.bg }};
+        --color-bg-light:     {{ theme_dark.bg_light }};
+        --color-text-muted:   {{ theme_dark.text_muted }};
+        --color-highlight:    {{ theme_dark.highlight }};
+        --color-border:       {{ theme_dark.border }};
+        --color-border-muted: {{ theme_dark.border_muted }};
+        --color-secondary:    {{ theme_dark.secondary }};
+        --color-danger:       {{ theme_dark.danger }};
+        --color-warning:      {{ theme_dark.warning }};
+        --color-success:      {{ theme_dark.success }};
+        --color-info:         {{ theme_dark.info }};
+
+        /* ── OKLCH overrides (progressive enhancement) ── */
+        --color-bg-dark:      oklch(0.1 0.015 75);
+        --color-bg:           oklch(0.15 0.015 75);
+        --color-bg-light:     oklch(0.2 0.015 75);
+        --color-text-muted:   oklch(0.76 0.03 75);
+        --color-highlight:    oklch(0.5 0.03 75);
+        --color-border:       oklch(0.4 0.03 75);
+        --color-border-muted: oklch(0.3 0.03 75);
+        --color-secondary:    oklch(0.76 0.1 255);
+        --color-danger:       oklch(0.7 0.05 30);
+        --color-warning:      oklch(0.7 0.05 100);
+        --color-success:      oklch(0.7 0.05 160);
+        --color-info:         oklch(0.7 0.05 260);
+    }
+
+    body.dark-mode .page-header {
+        background: var(--slide-bg);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    body.dark-mode .page-title {
+        color: var(--color-primary);
+    }
+
+    body.dark-mode .slide {
+        background: var(--slide-bg);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    }
+
+    body.dark-mode .top-bar {
+        background: transparent;
+    }
+
+    body.dark-mode .header-area {
+        background: transparent;
+    }
+
+    body.dark-mode .slide-number,
+    body.dark-mode .slide-date,
+    body.dark-mode .slide-footer {
+        color: var(--color-muted);
+    }
+
+    body.dark-mode .company-name {
+        color: var(--color-primary);
+    }
+
+    body.dark-mode .slide-title {
+        color: var(--color-primary);
+    }
+
+    body.dark-mode .slide-subtitle {
+        color: var(--color-text);
+    }
+
+    body.dark-mode .content-area {
+        background: var(--content-bg);
+    }
+
+    body.dark-mode .text-content {
+        color: var(--color-text);
+    }
+
+    body.dark-mode .notes-area {
+        color: var(--color-light);
+        background: transparent;
+    }
+
+    body.dark-mode .slides-container {
+        background-color: var(--color-bg-dark);
+    }
+
+    /* Glass effect for slides (Optional) */
+    body.glass-slides-enabled .slide {
+        background: rgba(255, 255, 255, 0.7) !important;
+        backdrop-filter: blur(20px) saturate(150%);
+        -webkit-backdrop-filter: blur(20px) saturate(150%);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1),
+                    0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+    }
+
+    body.glass-slides-enabled.dark-mode .slide {
+        background: rgba(45, 45, 45, 0.7) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3),
+                    0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+    }
+
+    body.glass-slides-enabled .top-bar {
+        background: transparent !important;
+        backdrop-filter: none;
+        border-bottom: none;
+    }
+
+    body.glass-slides-enabled.dark-mode .top-bar {
+        background: transparent !important;
+        backdrop-filter: none;
+        border-bottom: none;
+    }
+
+    body.glass-slides-enabled .header-area {
+        background: transparent;
+    }
+
+    body.glass-slides-enabled .content-area {
+        background: rgba(249, 249, 249, 0.5) !important;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    body.glass-slides-enabled.dark-mode .content-area {
+        background: rgba(37, 37, 37, 0.5) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    body.glass-slides-enabled {
+        background: linear-gradient(135deg,
+            #667eea 0%,
+            #764ba2 25%,
+            #f093fb 50%,
+            #4facfe 75%,
+            #00f2fe 100%);
+        background-attachment: fixed;
+    }
+
+    body.glass-slides-enabled.dark-mode {
+        background: linear-gradient(135deg,
+            #1a1a2e 0%,
+            #16213e 25%,
+            #0f3460 50%,
+            #533483 75%,
+            #1a1a2e 100%);
+        background-attachment: fixed;
+    }
+
+    body.glass-slides-enabled .slides-container {
+        background: transparent;
+    }
+
+    /* ==== RESET & BASE ==== */
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: var(--font-family, Calibri, Arial, sans-serif);
+        background-color: #f5f5f5;
+        transition: background-color 0.3s;
+    }
+
+    /* ==== PAGE HEADER ==== */
+    .page-header {
+        text-align: center;
+        background: white;
+        padding: 30px 20px;
+        position: relative;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .page-title {
+        color: var(--color-primary);
+        font-size: 32px;
+        margin: 0;
+        display: inline-block;
+    }
+
+    .button-group {
+        position: absolute;
+        top: 50%;
+        right: 40px;
+        transform: translateY(-50%);
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .icon-btn {
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        background-color: #f0f0f0;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        color: #333;
+    }
+
+    .icon-btn:hover {
+        background-color: transparent;
+        border-color: #ddd;
+        transform: translateY(-1px);
+    }
+
+    .icon-btn:active {
+        transform: translateY(0);
+        box-shadow: none;
+    }
+
+    .icon-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .icon-btn:disabled:hover {
+        transform: none;
+        box-shadow: none;
+        background-color: #f0f0f0;
+    }
+
+    .icon-btn-primary {
+        background-color: var(--color-primary);
+        border-color: var(--color-primary);
+        color: white;
+    }
+
+    .icon-btn-primary:hover {
+        background-color: var(--color-primary);
+        border-color: var(--color-primary);
+        transform: translateY(-1px);
+    }
+
+    body.dark-mode .icon-btn {
+        background-color: var(--color-bg-light);
+        border-color: var(--color-border);
+        color: var(--color-text);
+    }
+
+    body.dark-mode .icon-btn:hover {
+        background-color: var(--color-highlight);
+        border-color: var(--color-border);
+    }
+
+    body.dark-mode .icon-btn-primary {
+        background-color: var(--color-primary);
+        border-color: var(--color-primary);
+        color: white;
+    }
+
+    body.dark-mode .icon-btn-primary:hover {
+        background-color: var(--color-primary);
+        border-color: var(--color-primary);
+        opacity: 0.9;
+    }
+
+    .loading-indicator {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 20px 40px;
+        border-radius: 8px;
+        z-index: 10001;
+        font-size: 16px;
+    }
+
+    .loading-indicator.active {
+        display: block;
+    }
+
+    /* ===== SLIDES CONTAINER ===== */
+    .slides-container {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 40px;
+    }
+
+    /* ==== SLIDE CANVAS ==== */
+    .slide {
+        background: var(--slide-bg);
+        width: {{ slide_width }}px;
+        height: {{ slide_height }}px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        position: relative;
+        flex-shrink: 0;
+        margin: 0;
+        border-radius: 8px;
+        overflow: visible;
+    }
+
+    .agenda-link {
+        color: var(--color-primary);
+        text-decoration: none;
+        cursor: pointer;
+        transition: color 0.3s;
+    }
+
+    .agenda-link:hover {
+        color: var(--color-primary);
+        text-decoration: underline;
+    }
+
+    /* Normal mode tooltip */
+    .tooltip {
+        position: fixed !important;
+        z-index: 999999 !important;
+        pointer-events: none;
+        background: rgba(255,255,255,0.95) !important;
+        border: 1px solid #ddd !important;
+        border-radius: 6px !important;
+        padding: 16px 20px !important;
+        font-size: 16px !important;
+        line-height: 1.6 !important;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.15) !important;
+        max-width: 400px !important;
+    }
+
+    /* Presentation mode tooltip (ENLARGED) */
+    body.presentation-mode .tooltip {
+        position: fixed !important;
+        padding: 20px 28px !important;
+        font-size: 18px !important;
+        line-height: 1.8 !important;
+        border-radius: 8px !important;
+        max-width: 500px !important;
+        border: 2px solid #ddd !important;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.2) !important;
+    }
+
+    .tooltip b,
+    .tooltip strong {
+        font-size: 1.1em !important;
+        font-weight: 700 !important;
+    }
+
+    body.presentation-mode .tooltip b,
+    body.presentation-mode .tooltip strong {
+        font-size: 1.15em !important;
+    }
+
+    .tooltip br + * {
+        margin-top: 8px !important;
+    }
+
+    body.presentation-mode .tooltip br + * {
+        margin-top: 12px !important;
+    }
+
+    body.dark-mode .tooltip {
+        background: rgba(45, 45, 45, 0.95) !important;
+        border-color: var(--color-border) !important;
+        color: var(--color-text) !important;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.5) !important;
+    }
+
+    body.dark-mode.presentation-mode .tooltip {
+        background: rgba(35, 35, 35, 0.98) !important;
+        border: 2px solid var(--color-border-muted) !important;
+    }
+
+    .help-tooltip {
+        position: fixed;
+        top: 80px;
+        right: 150px;
+        max-width: 350px;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 16px 20px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+        z-index: 10002;
+        display: none;
+        font-size: 14px;
+        line-height: 1.6;
+        color: #333;
+        text-align: left;
+    }
+
+    .help-tooltip.active {
+        display: block;
+        animation: fadeIn 0.2s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-5px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    body.dark-mode .help-tooltip {
+        background: var(--slide-bg);
+        border-color: var(--color-border);
+        color: var(--color-text);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+    }
+
+    .slide-nav-buttons {
+        position: absolute;
+        top: 3px;
+        right: 3px;
+        z-index: 900;
+        display: flex;
+        gap: 4px;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: auto;
+    }
+
+    .slide-nav-buttons:hover {
+        opacity: 1;
+    }
+
+    .slide-nav-btn {
+        width: 24px;
+        height: 24px;
+        padding: 0;
+        background-color: var(--color-primary);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+    }
+
+    .slide-nav-btn:hover {
+        transform: scale(1.1);
+    }
+
+    .slide-nav-btn svg {
+        width: 14px;
+        height: 14px;
+        stroke: currentColor;
+        fill: none;
+    }
+
+    body.dark-mode .slide-nav-btn {
+        background-color: var(--color-primary);
+    }
+
+    body.dark-mode .slide-nav-btn:hover {
+        background-color: var(--color-primary);
+        opacity: 0.85;
+    }
+
+    body.presentation-mode .slide-nav-buttons {
+        display: none;
+    }
+
+    body.presentation-mode .presentation-hover-zone {
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 200px;
+        height: 60px;
+        z-index: 9999;
+        pointer-events: auto;
+    }
+
+    body.presentation-mode .presentation-hover-zone:hover .slide-nav-btn-home {
+        opacity: 1;
+    }
+
+    body.presentation-mode .slide-nav-btn-home {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        z-index: 10000;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        width: 40px;
+        height: 40px;
+    }
+
+    body.presentation-mode .slide-nav-btn-home svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    body.presentation-mode .slide {
+        overflow: visible;
+    }
+
+    body.presentation-mode .custom-box {
+        /* Ensure boxes stay visible and properly positioned */
+        position: absolute !important;
+        z-index: 1000 !important;
+        pointer-events: auto !important;
+    }
+
+    {% if debug_mode %}
+    .slide.debug-mode .overlay-layer { border: 3px dashed purple; }
+    .slide.debug-mode .warning-strip { border: 3px dashed orange; }
+    .slide.debug-mode .top-bar { border: 3px solid red; }
+    .slide.debug-mode .header-area { border: 3px solid blue; }
+    .slide.debug-mode .content-area { border: 3px solid green; }
+    .slide.debug-mode .notes-area { border: 3px solid orange; }
+
+
+    .debug-label {
+        position: absolute;
+        background: rgba(0,0,0,0.8);
+        color: white;
+        padding: 4px 8px;
+        font-size: 10px;
+        font-weight: bold;
+        border-radius: 3px;
+        z-index: 1000;
+        pointer-events: none;
+    }
+    {% endif %}
+
+    .overlay-layer {
+        position: absolute;
+        z-index: 999;
+        padding: 4px 14px;
+        background: var(--overlay-bg, rgba(220, 53, 69, 0.9));
+        color: var(--overlay-color, white);
+        font-size: var(--overlay-font-size, 10px);
+        font-weight: bold;
+        border-radius: 6px;
+        white-space: nowrap;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        letter-spacing: 0.5px;
+    }
+
+    .overlay-layer.top-right { top: 3px; right: 3px; }
+    .overlay-layer.top-left { top: 3px; left: 3px; }
+    .overlay-layer.bottom-right { bottom: 3px; right: 3px; }
+    .overlay-layer.bottom-left { bottom: 3px; left: 3px; }
+
+
+    /* Warning strip styles - overlay mode (non-intrusive) */
+    .warning-strip {
+        position: absolute;
+        z-index: 850; /* Below overlay (999), above content */
+        left: 0;
+        right: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: bold;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        white-space: nowrap;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        opacity: 0.95; /* Slightly transparent so content beneath is visible */
+    }
+
+    .warning-strip.top {
+        top: 0;
+    }
+
+    .warning-strip.bottom {
+        bottom: 0;
+    }
+
+    .warning-strip:hover {
+        opacity: 0.6;
+        transition: opacity 0.3s ease;
+    }
+
+    /* Dark mode support */
+    body.dark-mode .warning-strip {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+        opacity: 0.98;
+    }
+
+    /* ===== CUSTOM BOXES ===== */
+    .custom-box {
+        position: absolute;
+        box-sizing: border-box;
+        pointer-events: auto;
+        overflow: hidden;
+    }
+
+    .custom-box.box-text {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .custom-box.box-html {
+        overflow: auto;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(42, 145, 139, 0.2) transparent;
+    }
+
+    .custom-box.box-html::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+
+    .custom-box.box-html::-webkit-scrollbar-track {
+        background: transparent;
+        border-radius: 10px;
+    }
+
+    .custom-box.box-html::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg,
+            var(--color-primary) 0%,
+            var(--color-primary) 100%);
+        opacity: 0.2;
+        border-radius: 10px;
+        border: 2px solid transparent;
+        background-clip: padding-box;
+        transition: all 0.3s ease;
+    }
+
+    /* Dark mode: neutralise the inline background-color and border that come
+       from Custom_Box_config, and update the scrollbar to match the dark palette */
+    body.dark-mode .custom-box {
+        background-color: transparent !important;
+        border-color: rgba(255, 255, 255, 0.08) !important;
+    }
+
+    body.dark-mode .custom-box.box-html {
+        scrollbar-color: color-mix(in srgb, var(--color-primary) 30%, transparent) transparent;
+    }
+
+    body.dark-mode .custom-box.box-html::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg,
+            color-mix(in srgb, var(--color-primary) 30%, transparent) 0%,
+            color-mix(in srgb, var(--color-primary) 30%, transparent) 100%);
+        opacity: 0.3;
+    }
+
+    body.dark-mode .custom-box.box-html::-webkit-scrollbar-thumb:hover {
+        opacity: 0.6;
+    }
+
+    .custom-box.box-image {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    .custom-box.box-image img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+    }
+
+    .top-bar {
+        position: absolute;
+        top: 6px;
+        left: 0;
+        right: 0;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        padding: 0 20px;
+        background: transparent;
+    }
+
+    body.dark-mode .top-bar {
+        background: transparent;
+    }
+
+    body.glass-slides-enabled .top-bar {
+        background: transparent !important;
+        backdrop-filter: none;
+        border-bottom: none;
+    }
+
+    body.glass-slides-enabled.dark-mode .top-bar {
+        background: transparent !important;
+        backdrop-filter: none;
+        border-bottom: none;
+    }
+
+    .slide-number, .slide-date, .slide-footer {
+        font-size: 12px;
+        color: var(--color-muted);
+        margin-right: 20px;
+    }
+
+    .slide-footer { flex-grow: 1; }
+
+    .company-name {
+        font-size: 12px;
+        color: var(--color-primary);
+        font-weight: bold;
+    }
+
+    .header-area {
+        position: absolute;
+        top: 56px;
+        left: 50px;
+        right: 50px;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        background: transparent !important;
+        z-index: 100;
+    }
+
+    .header-area.has-content {
+        min-height: 80px;
+        padding: 10px 0 12px 0;
+        background: transparent !important;
+    }
+
+    .header-top-row {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        position: relative;
+    }
+
+    .title-content {
+        flex-grow: 1;
+        padding-right: 60px;
+    }
+
+    .slide-title {
+        font-size: var(--font-title);
+        font-weight: bold;
+        color: var(--color-primary);
+        margin: 0 0 10px 0;
+        line-height: 1.2;
+        position: relative;
+        z-index: 100;
+    }
+
+    .slide-subtitle {
+        font-size: var(--font-subtitle);
+        color: var(--color-text);
+        margin: 0;
+        position: relative;
+        z-index: 100;
+    }
+
+    .title-image {
+        max-height: 40px;
+        max-width: 50px;
+        margin-left: 20px;
+    }
+
+    .title-image-svg {
+        position: absolute !important;
+        top: 0 !important;
+        right: 0 !important;
+        width: 50px !important;
+        height: 50px !important;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    .title-image-svg svg {
+        max-width: 50px !important;
+        max-height: 50px !important;
+        width: auto !important;
+        height: auto !important;
+        object-fit: contain !important;
+    }
+
+    .content-area {
+        position: absolute;
+        left: 50px;
+        right: 50px;
+        bottom: 60px;
+        background: var(--content-bg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        overflow: visible;
+    }
+
+    .content-area.header-empty { top: 70px; }
+    .content-area.header-present { top: 150px; }
+
+    .chart-container {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: visible !important;
+    }
+
+    .chart-element {
+        width: 100%;
+        height: 100%;
+        overflow: visible !important;
+    }
+
+    .chart-container svg,
+    .chart-element svg {
+        overflow: visible !important;
+    }
+
+    .text-content {
+        width: 100%;
+        height: 100%;
+        padding: 20px;
+        overflow-y: auto;
+        font-size: var(--font-body);
+        line-height: 1.6;
+        color: var(--color-text);
+        scrollbar-width: thin;
+        scrollbar-color: rgba(42, 145, 139, 0.2) transparent;
+    }
+
+    .text-content::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .text-content::-webkit-scrollbar-track {
+        background: transparent;
+        border-radius: 10px;
+    }
+
+    .text-content::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg,
+            var(--color-primary) 0%,
+            var(--color-primary) 100%);
+        opacity: 0.2;
+        border-radius: 10px;
+        border: 2px solid transparent;
+        background-clip: padding-box;
+        transition: all 0.3s ease;
+    }
+
+    .text-content::-webkit-scrollbar-thumb:hover {
+        opacity: 0.5;
+        border-width: 1px;
+    }
+
+    .text-content::-webkit-scrollbar-thumb:active {
+        opacity: 0.6;
+    }
+
+    body.dark-mode .text-content {
+        scrollbar-color: color-mix(in srgb, var(--color-primary) 30%, transparent) transparent;
+    }
+
+    body.dark-mode .text-content::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg,
+            color-mix(in srgb, var(--color-primary) 30%, transparent) 0%,
+            color-mix(in srgb, var(--color-primary) 30%, transparent) 100%);
+        opacity: 0.3;
+    }
+
+    body.dark-mode .text-content::-webkit-scrollbar-thumb:hover {
+        opacity: 0.6;
+    }
+
+    body.dark-mode .text-content::-webkit-scrollbar-thumb:active {
+        opacity: 0.7;
+    }
+
+    .text-content h3 {
+        color: var(--color-primary);
+        margin-top: 0;
+        font-size: 20px;
+    }
+
+    .svg-container {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    .svg-container svg {
+        max-width: 100%;
+        max-height: 100%;
+        width: auto;
+        height: auto;
+    }
+
+    .image-container {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    .image-container img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+    }
+
+    .content-area.layout-single {
+        display: block;
+    }
+
+    .content-area.layout-two-column {
+        display: flex;
+        gap: 15px;
+    }
+
+    .content-area.layout-two-column .chart-container {
+        flex: 1;
+    }
+
+    .content-area.layout-two-column.custom-scale .chart-container:first-child {
+        flex: var(--first-scale, 1);
+    }
+
+    .content-area.layout-two-column.custom-scale .chart-container:last-child {
+        flex: var(--second-scale, 1);
+    }
+
+    .content-area.layout-three-column {
+        display: flex;
+        gap: 12px;
+    }
+
+    .content-area.layout-three-column .chart-container {
+        flex: 1;
+    }
+
+    .content-area.layout-grid-2x2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr 1fr;
+        gap: 12px;
+        overflow: hidden;
+    }
+
+    .content-area.layout-grid-2x2 .chart-container {
+        min-height: 0;
+        min-width: 0;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .content-area.layout-grid-2x2 .chart-element {
+        width: 100% !important;
+        height: 100% !important;
+    }
+
+    .content-area.layout-grid-2x2 .image-container {
+        width: 100% !important;
+        height: 100% !important;
+    }
+
+    .content-area.layout-grid-2x2 .image-container img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+    }
+
+    .notes-area {
+        position: absolute;
+        bottom: 10px;
+        left: 50px;
+        right: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        font-size: 11px;
+        color: var(--color-footnote);
+        color: var(--color-light);
+        font-style: italic;
+    }
+
+    .present-from-here-btn {
+        position: absolute;
+        top: 3px;
+        right: 3px;
+        z-index: 900;
+        width: 16px;
+        height: 16px;
+        padding: 0;
+        background-color: var(--color-primary);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        opacity: 0;
+        transition: opacity 0.3s ease, background-color 0.3s ease, transform 0.2s ease;
+        pointer-events: auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .present-from-here-btn:hover {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+
+    body.dark-mode .present-from-here-btn {
+        background-color: var(--color-primary);
+    }
+
+    body.dark-mode .present-from-here-btn:hover {
+        background-color: var(--color-primary);
+        opacity: 0.85;
+    }
+
+    body.presentation-mode {
+        background-color: #000;
+        overflow: hidden;
+    }
+
+    body.presentation-mode .page-header { display: none; }
+
+    body.presentation-mode .slides-container {
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        width: 100vw;
+        overflow: visible;
+    }
+
+    body.presentation-mode .slide {
+        display: none;
+        margin: 0;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+        border-radius: 0;
+    }
+
+    body.presentation-mode .slide.active-slide {
+        display: block;
+        transform-origin: center center;
+        overflow: visible !important;
+        contain: none !important;
+    }
+
+    body.presentation-mode .content-area,
+    body.presentation-mode .chart-container,
+    body.presentation-mode .chart-element {
+        overflow: visible !important;
+        contain: none !important;
+    }
+
+    body.presentation-mode svg,
+    body.presentation-mode svg * {
+        overflow: visible !important;
+    }
+
+    body.presentation-mode .sankey-link {
+        display: block !important;
+        visibility: visible !important;
+        opacity: inherit !important;
+    }
+
+    body.presentation-mode .present-from-here-btn {
+        display: none;
+    }
+
+    body.presentation-mode .slide-nav-buttons {
+        display: none;
+    }
+
+    .presentation-controls {
+        display: none;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 10000;
+    }
+
+    body.presentation-mode .presentation-controls { display: block; }
+
+    .progress-bar-container {
+        height: 4px;
+        background-color: rgba(255,255,255,0.3);
+    }
+
+    .progress-bar {
+        height: 100%;
+        background-color: var(--color-primary);
+        transition: width 0.3s ease;
+        width: 0%;
+    }
+
+    [id^="customTooltip_"] {
+        position: fixed !important;
+        background-color: rgba(50, 50, 50, 0.9) !important;
+        border: 1px solid #333 !important;
+        color: #fff !important;
+        padding: 8px 12px !important;
+        border-radius: 4px !important;
+        font-size: 12px !important;
+        font-family: var(--font-family, Calibri, Arial, sans-serif) !important;
+        pointer-events: none !important;
+        display: none !important;
+        z-index: 99999 !important;
+        white-space: nowrap !important;
+    }
+
+    body.presentation-mode [id^="customTooltip_"] {
+        position: fixed !important;
+        z-index: 99999 !important;
+    }
+
+    .index-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: --slide-bg;
+        backdrop-filter: blur(8px);
+        z-index: 10003;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .index-overlay.active {
+        display: flex;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .index-overlay-content {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 16px;
+        width: 50%;
+        max-width: 650px;
+        max-height: 75vh;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 8px 32px rgba(42, 145, 139, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+
+    body.dark-mode .index-overlay-content {
+        background: color-mix(in srgb, var(--slide-bg) 95%, transparent);
+        box-shadow: 0 8px 32px color-mix(in srgb, var(--color-primary) 50%, transparent);
+    }
+
+    body.dark-mode .index-overlay-header {
+        border-bottom-color: var(--color-border-muted);
+        padding: 10px;
+    }
+
+    body.dark-mode .index-overlay-close {
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--color-text);
+    }
+
+    body.dark-mode .index-overlay-title {
+        color: var(--color-primary);
+    }
+
+    body.dark-mode .index-overlay-subtitle {
+        color: var(--color-muted);
+    }
+
+    body.dark-mode .index-overlay-items-container {
+        scrollbar-color: color-mix(in srgb, var(--color-primary) 30%, transparent) transparent;
+    }
+
+    body.dark-mode .index-overlay-items-container::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg,
+            color-mix(in srgb, var(--color-primary) 20%, transparent) 0%,
+            color-mix(in srgb, var(--color-primary) 35%, transparent) 50%,
+            color-mix(in srgb, var(--color-primary) 20%, transparent) 100%);
+    }
+
+    body.dark-mode .index-overlay-items-container::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(180deg,
+            color-mix(in srgb, var(--color-primary) 40%, transparent) 0%,
+            color-mix(in srgb, var(--color-primary) 60%, transparent) 50%,
+            color-mix(in srgb, var(--color-primary) 40%, transparent) 100%);
+    }
+
+    body.dark-mode .index-overlay-items-container::-webkit-scrollbar-thumb:active {
+        background: color-mix(in srgb, var(--color-primary) 70%, transparent);
+    }
+
+    body.dark-mode .index-overlay-group-heading {
+        color: var(--color-primary);
+    }
+
+    body.dark-mode .index-overlay-item-number {
+        background: var(--color-primary);
+    }
+
+    body.dark-mode .index-overlay-item:hover .index-overlay-item-number {
+        box-shadow: 0 2px 8px color-mix(in srgb, var(--color-primary) 40%, transparent);
+    }
+
+    body.dark-mode .index-overlay-item:hover .index-overlay-item-text {
+        color: var(--color-primary);
+        opacity: 0.8;
+    }
+
+    body.dark-mode .index-overlay-item-text {
+        color: var(--color-primary);
+    }
+
+    .index-overlay-close {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        width: 32px;
+        height: 32px;
+        background: rgba(0, 0, 0, 0.05);
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        color: #666;
+        font-size: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+
+    .index-overlay-close:hover {
+        background: rgba(220, 53, 69, 0.9);
+        color: white;
+        transform: rotate(90deg);
+    }
+
+    body.dark-mode .index-overlay-close {
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--color-text);
+    }
+
+    .index-overlay-title {
+        color: var(--color-primary);
+        font-size: 24px;
+        font-weight: bold;
+        margin: 0;
+        text-align: center;
+    }
+
+    body.dark-mode .index-overlay-title {
+        color: var(--color-primary);
+    }
+
+    .index-overlay-subtitle {
+        text-align: center;
+        color: var(--color-muted);
+        font-size: 13px;
+        margin-top: 6px;
+        font-style: italic;
+    }
+
+    body.dark-mode .index-overlay-subtitle {
+        color: var(--color-muted);
+    }
+
+    .index-overlay-items-container {
+        flex: 1;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding: 20px 40px 24px 40px;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(0, 25, 101, 0.2) transparent;
+    }
+
+    .index-overlay-items-container::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .index-overlay-items-container::-webkit-scrollbar-track {
+        background: transparent;
+        border-radius: 10px;
+    }
+
+    .index-overlay-items-container::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg,
+            rgba(42, 145, 140, 0.658) 0%,
+            rgba(42, 145, 139, 0.658) 50%,
+            rgba(42, 145, 139, 0.658) 100%);
+        border-radius: 10px;
+        border: 2px solid transparent;
+        background-clip: padding-box;
+        transition: all 0.3s ease;
+    }
+
+    .index-overlay-items-container::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(180deg,
+            rgba(42, 145, 139, 0.658) 0%,
+            rgba(42, 145, 139, 0.658) 50%,
+            rgba(42, 145, 139, 0.658) 100%);
+        border-width: 1px;
+    }
+
+    .index-overlay-items-container::-webkit-scrollbar-thumb:active {
+        background: rgba(42, 145, 139, 0.6);
+    }
+
+    body.dark-mode .index-overlay-items-container {
+        scrollbar-color: color-mix(in srgb, var(--color-primary) 30%, transparent) transparent;
+    }
+
+    .index-overlay-items {
+        {% if index_columns == 1 %}
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        {% elif index_columns == 2 %}
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px 20px;
+        align-items: start;
+        {% elif index_columns == 3 %}
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 8px 16px;
+        align-items: start;
+        {% endif %}
+    }
+
+    .index-overlay-group-heading {
+        font-weight: bold;
+        font-size: var(--font-index-group-heading, 16px);
+        color: var(--color-primary);
+        margin: 16px 0 8px 0;
+        letter-spacing: 0.5px;
+    }
+
+    body.dark-mode .index-overlay-group-heading {
+        color: var(--color-primary);
+    }
+
+    .index-overlay-item {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        padding: 6px 0;
+        transition: all 0.2s ease;
+        min-width: 0;
+    }
+
+    .index-overlay-item:hover {
+        transform: translateX(4px);
+    }
+
+    .index-overlay-item:hover .index-overlay-item-text {
+        color: var(--color-primary);
+        opacity: 0.8;
+    }
+
+    .index-overlay-items[style*="grid"] .index-overlay-group-heading {
+        grid-column: 1 / -1;
+    }
+
+    .index-overlay-item-number {
+        background: var(--color-primary);
+        color: white;
+        min-width: 2.3em;
+        height: 2.3em;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: var(--font-index-item, 14px);
+        margin-right: 12px;
+        flex-shrink: 0;
+        transition: all 0.2s ease;
+    }
+
+    .index-overlay-item:hover .index-overlay-item-number {
+        transform: scale(1.1);
+        box-shadow: 0 2px 8px rgba(42, 145, 139, 0.3);
+    }
+
+    body.dark-mode .index-overlay-item-number {
+        background: var(--color-primary);
+    }
+
+    body.dark-mode .index-overlay-item:hover .index-overlay-item-number {
+        box-shadow: 0 2px 8px color-mix(in srgb, var(--color-primary) 40%, transparent);
+    }
+
+    body.dark-mode .index-overlay-item:hover .index-overlay-item-text {
+        color: var(--color-primary);
+        opacity: 0.8;
+    }
+
+    .index-overlay-item-text {
+        font-size: var(--font-index-item, 14px);
+        line-height: 1.4;
+        color: var(--color-primary);
+        transition: all 0.2s ease;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        word-break: break-word;
+    }
+
+    body.dark-mode .index-overlay-item-text {
+        color: var(--color-primary);
+    }
+
+    /* ===== SUMMARY OVERLAY (Quick Insights) ===== */
+    .summary-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: --slide-bg;
+        backdrop-filter: blur(8px);
+        z-index: 10004;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .summary-overlay.active {
+        display: flex;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .summary-overlay-content {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 16px;
+        width: 50%;
+        max-width: 650px;
+        max-height: 75vh;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 8px 32px rgba(74, 158, 255, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+
+    body.dark-mode .summary-overlay-content {
+        background: color-mix(in srgb, var(--slide-bg) 95%, transparent);
+        box-shadow: 0 8px 32px color-mix(in srgb, var(--color-primary) 50%, transparent);
+    }
+
+    body.dark-mode .summary-overlay-header {
+        border-bottom-color: var(--color-border-muted);
+    }
+
+    body.dark-mode .summary-overlay-close {
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--color-text);
+    }
+
+    body.dark-mode .summary-overlay-title {
+        color: var(--color-primary);
+    }
+
+    body.dark-mode .summary-overlay-subtitle {
+        color: var(--color-muted);
+    }
+
+    body.dark-mode .summary-overlay-items-container::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg,
+            color-mix(in srgb, var(--color-primary) 30%, transparent) 0%,
+            color-mix(in srgb, var(--color-primary) 45%, transparent) 50%,
+            color-mix(in srgb, var(--color-primary) 30%, transparent) 100%);
+    }
+
+    body.dark-mode .summary-overlay-item {
+        color: var(--color-text);
+        border-bottom-color: var(--color-border-muted);
+    }
+
+    body.dark-mode .summary-overlay-item-text strong {
+        color: var(--color-primary);
+    }
+
+    /* ── Summary overlay structural (light + shared) ── */
+    .summary-overlay-header {
+        padding: 24px 40px 16px 40px;
+        flex-shrink: 0;
+        position: relative;
+        border-bottom: 1px solid color-mix(in srgb, var(--color-primary) 10%, transparent);
+    }
+
+    .summary-overlay-close {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        width: 32px;
+        height: 32px;
+        background: rgba(0, 0, 0, 0.05);
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        color: var(--color-muted);
+        font-size: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+
+    .summary-overlay-close:hover {
+        background: color-mix(in srgb, var(--color-primary) 90%, transparent);
+        color: white;
+        transform: rotate(90deg);
+    }
+
+    .summary-overlay-title {
+        color: var(--color-primary);
+        font-size: 24px;
+        font-weight: bold;
+        margin: 0;
+        text-align: center;
+    }
+
+    .summary-overlay-subtitle {
+        text-align: center;
+        color: var(--color-muted);
+        font-size: 13px;
+        margin-top: 6px;
+        font-style: italic;
+    }
+
+    .summary-overlay-items-container {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px 40px 24px 40px;
+        scrollbar-width: thin;
+        scrollbar-color: color-mix(in srgb, var(--color-primary) 20%, transparent) transparent;
+    }
+
+    .summary-overlay-items-container::-webkit-scrollbar { width: 8px; }
+    .summary-overlay-items-container::-webkit-scrollbar-track { background: transparent; border-radius: 10px; }
+    .summary-overlay-items-container::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg,
+            color-mix(in srgb, var(--color-primary) 20%, transparent) 0%,
+            color-mix(in srgb, var(--color-primary) 35%, transparent) 50%,
+            color-mix(in srgb, var(--color-primary) 20%, transparent) 100%);
+        border-radius: 10px;
+        border: 2px solid transparent;
+        background-clip: padding-box;
+        transition: all 0.3s ease;
+    }
+    .summary-overlay-items-container::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(180deg,
+            color-mix(in srgb, var(--color-primary) 40%, transparent) 0%,
+            color-mix(in srgb, var(--color-primary) 60%, transparent) 50%,
+            color-mix(in srgb, var(--color-primary) 40%, transparent) 100%);
+    }
+
+    .summary-overlay-item {
+        display: flex;
+        align-items: flex-start;
+        padding: 10px 0;
+        font-size: 15px;
+        line-height: 1.6;
+        color: var(--color-text);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .summary-overlay-item:last-child { border-bottom: none; }
+
+    .summary-overlay-item-bullet {
+        color: var(--color-primary);
+        font-size: 18px;
+        margin-right: 12px;
+        flex-shrink: 0;
+        font-weight: bold;
+    }
+
+    .summary-overlay-item-text { flex: 1; }
+
+    .summary-overlay-item-text strong {
+        color: var(--color-primary);
+        font-weight: 600;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+    }
+
+    /* ===== DEEP DIVE FEATURE ===== */
+
+    /* Trigger button — bare SVG icon, no circle/shadow */
+    .deep-dive-btn {
+        position: absolute;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: var(--dd-btn-w, 24px);
+        height: var(--dd-btn-h, 24px);
+        border: none;
+        border-radius: 4px;
+        background: transparent;
+        color: var(--color-primary);
+        cursor: pointer;
+        transition: color 0.15s, transform 0.15s, opacity 0.15s;
+        z-index: 1100;
+        padding: 0;
+        box-shadow: none;
+    }
+
+    .deep-dive-btn:hover {
+        color: var(--color-primary);
+        transform: scale(1.18);
+        opacity: 0.75;
+        background: transparent;
+        box-shadow: none;
+    }
+
+    .deep-dive-btn svg {
+        width: 100%;
+        height: 100%;
+        /* Let each icon's own attributes win.
+           fill: currentColor is the safe default for filled/Material icons.
+           Stroke-based icons (built-ins) declare their own stroke/fill on the <svg> tag. */
+        fill: currentColor;
+        pointer-events: none;
+    }
+
+    /* Tooltip on hover */
+    .deep-dive-btn::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        bottom: calc(100% + 6px);
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0,0,0,0.75);
+        color: #fff;
+        font-size: 11px;
+        white-space: nowrap;
+        padding: 3px 8px;
+        border-radius: 4px;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.15s;
+    }
+
+    .deep-dive-btn:hover::after {
+        opacity: 1;
+    }
+
+    body.dark-mode .deep-dive-btn {
+        color: var(--color-primary);
+    }
+
+    /* When ANY panel on this slide is open, push buttons behind it */
+    .slide:has(.deep-dive-panel.dd-active) .deep-dive-btn {
+        z-index: 1020;
+    }
+
+    /* Panel — lives absolutely inside the slide, curtain style */
+    .deep-dive-panel {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        display: flex;
+        flex-direction: column;
+        border-radius: 0;
+        box-shadow: -4px 0 24px rgba(0,0,0,0.18);
+        pointer-events: none;
+        opacity: 0;
+        transform: translateX(12px);
+        transition: opacity 0.22s ease, transform 0.22s ease;
+        overflow: hidden;
+        font-family: var(--font-family, Calibri, Arial, sans-serif);
+        /* Width: configurable via --dd-width, default 40% of slide */
+        width: var(--dd-width, 40%);
+        /* Theme-aware background — overridden by --dd-bg when BG_Color is set */
+        background: var(--dd-bg, var(--content-bg));
+        border-left: 1px solid color-mix(in srgb, var(--color-primary) 18%, transparent);
+        z-index: 1050;
+    }
+
+    /* Pinned to right side (default — button on right half) */
+    .deep-dive-panel.dd-side-right {
+        right: 0;
+        left: auto;
+        border-left: 1px solid color-mix(in srgb, var(--color-primary) 18%, transparent);
+        border-right: none;
+        border-radius: 8px 0 0 8px;
+        box-shadow: -4px 0 24px rgba(0,0,0,0.18);
+        transform: translateX(12px);
+    }
+
+    /* Pinned to left side (button on left half) */
+    .deep-dive-panel.dd-side-left {
+        left: 0;
+        right: auto;
+        border-right: 1px solid color-mix(in srgb, var(--color-primary) 18%, transparent);
+        border-left: none;
+        border-radius: 0 8px 8px 0;
+        box-shadow: 4px 0 24px rgba(0,0,0,0.18);
+        transform: translateX(-12px);
+    }
+
+    .deep-dive-panel.dd-active {
+        pointer-events: auto;
+        opacity: 1;
+        transform: translateX(0) !important;
+        z-index: 1200 !important;  /* always above buttons (1100) and custom-boxes (1000) */
+    }
+
+    body.dark-mode .deep-dive-panel {
+        box-shadow: -4px 0 24px rgba(0,0,0,0.5);
+        border-color: color-mix(in srgb, var(--color-primary) 25%, transparent);
+    }
+
+    body.dark-mode .deep-dive-panel.dd-side-left {
+        box-shadow: 4px 0 24px rgba(0,0,0,0.5);
+    }
+
+    /* Panel header */
+    .deep-dive-panel-header {
+        padding: 14px 44px 10px 18px;
+        flex-shrink: 0;
+        border-bottom: 1px solid color-mix(in srgb, var(--color-primary) 15%, transparent);
+        position: relative;
+    }
+
+    .deep-dive-panel-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--color-primary);
+        margin: 0 0 2px 0;
+        line-height: 1.3;
+    }
+
+    .deep-dive-panel-subtitle {
+        font-size: 11px;
+        color: var(--color-muted);
+        margin: 0;
+        font-style: italic;
+    }
+
+    /* Close button */
+    .deep-dive-close {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 26px;
+        height: 26px;
+        background: rgba(0,0,0,0.06);
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        color: var(--color-muted);
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s, color 0.2s, transform 0.2s;
+        line-height: 1;
+        padding: 0;
+    }
+
+    .deep-dive-close:hover {
+        background: color-mix(in srgb, var(--color-primary) 90%, transparent);
+        color: white;
+        transform: rotate(90deg);
+    }
+
+    body.dark-mode .deep-dive-close {
+        background: rgba(255,255,255,0.08);
+        color: var(--color-text);
+    }
+
+    /* Scrollable body */
+    .deep-dive-panel-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 14px 18px 16px 18px;
+        scrollbar-width: thin;
+        scrollbar-color: color-mix(in srgb, var(--color-primary) 25%, transparent) transparent;
+    }
+
+    .deep-dive-panel-body::-webkit-scrollbar { width: 6px; }
+    .deep-dive-panel-body::-webkit-scrollbar-track { background: transparent; }
+    .deep-dive-panel-body::-webkit-scrollbar-thumb {
+        background: color-mix(in srgb, var(--color-primary) 30%, transparent);
+        border-radius: 6px;
+    }
+
+    /* Content block types */
+    .dd-block-heading {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--color-primary);
+        margin: 12px 0 4px 0;
+        line-height: 1.3;
+    }
+
+    .dd-block-heading:first-child { margin-top: 0; }
+
+    .dd-block-subheading {
+        font-size: 11.5px;
+        font-weight: 600;
+        color: var(--color-text);
+        margin: 8px 0 3px 0;
+        line-height: 1.3;
+        opacity: 0.85;
+    }
+
+    .dd-block-paragraph {
+        font-size: 11.5px;
+        color: var(--color-text);
+        line-height: 1.6;
+        margin: 0 0 6px 0;
+    }
+
+    .dd-block-list_item {
+        font-size: 11.5px;
+        color: var(--color-text);
+        line-height: 1.5;
+        margin: 2px 0;
+        padding-left: 14px;
+        position: relative;
+    }
+
+    .dd-block-list_item::before {
+        content: '•';
+        position: absolute;
+        left: 3px;
+        color: var(--color-primary);
+        font-weight: bold;
+    }
+
+    .dd-block-divider {
+        border: none;
+        border-top: 1px solid color-mix(in srgb, var(--color-primary) 12%, transparent);
+        margin: 8px 0;
+    }
+
+    .dd-block-html {
+        font-size: 11.5px;
+        color: var(--color-text);
+        line-height: 1.6;
+    }
+
+    /* Dark mode content */
+    body.dark-mode .dd-block-heading { color: var(--color-primary); }
+    body.dark-mode .dd-block-subheading { color: var(--color-text); }
+    body.dark-mode .dd-block-paragraph,
+    body.dark-mode .dd-block-list_item { color: var(--color-text); }
+
+    .content-area.layout-single .chart-container,
+    .content-area.layout-single .chart-element {
+        overflow: visible !important;
+    }
+
+    body.presentation-mode .slide {
+        overflow: visible !important;
+    }
+
+    body.presentation-mode .content-area,
+    body.presentation-mode .chart-container,
+    body.presentation-mode .chart-element {
+        overflow: visible !important;
+    }
+
+    svg, svg * {
+        overflow: visible !important;
+    }
+
+    .tooltip {
+        position: fixed !important;
+        z-index: 2147483647 !important;
+        pointer-events: none !important;
+    }
+
+    body.presentation-mode .tooltip {
+        position: fixed !important;
+        z-index: 2147483647 !important;
+    }
+
+    body.presentation-mode .slide .tooltip {
+        transform: none !important;
+    }
+
+    {{ custom_styles }}
+</style>
+</head>
+<body {% if glass_effect_slides %}class="glass-slides-enabled"{% endif %}>
+    <div id="loadingIndicator" class="loading-indicator">
+        <div>Processing... Please wait...</div>
+    </div>
+
+    <div class="page-header">
+        <!-- <h1 class="page-title">{{ page_title }}</h1> -->
+
+        <div class="button-group">
+            {% if 'screenshots' in enabled_buttons %}
+            <button id="imgBtn" class="icon-btn" title="Download as Images">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <polyline points="21 15 16 10 5 21"/>
+                </svg>
+            </button>
+            {% endif %}
+
+
+            {% if 'pdf_download' in enabled_buttons %}
+            <button id="pdfBtn" class="icon-btn" title="Download as PDF">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/>
+                    <line x1="16" y1="17" x2="8" y2="17"/>
+                </svg>
+            </button>
+            {% endif %}
+
+            {% if 'theme_switch' in enabled_buttons %}
+            <button id="themeBtn" class="icon-btn" title="Toggle Dark/Light Mode">
+                <svg class="theme-icon-light" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                </svg>
+                <svg class="theme-icon-dark" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;">
+                    <circle cx="12" cy="12" r="5"/>
+                    <line x1="12" y1="1" x2="12" y2="3"/>
+                    <line x1="12" y1="21" x2="12" y2="23"/>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                    <line x1="1" y1="12" x2="3" y2="12"/>
+                    <line x1="21" y1="12" x2="23" y2="12"/>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                </svg>
+            </button>
+            {% endif %}
+
+            <button id="helpBtn" class="icon-btn" title="Help">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M8.5 8.5A3.5 3.5 0 1 1 12 12v1"/>
+                    <path d="M12 17h.01"/>
+                  </svg>
+            </button>
+
+            <button id="presentBtn" class="icon-btn icon-btn-primary" title="Start Presentation">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="5 3 19 12 5 21 5 3"/>
+                </svg>
+            </button>
+        </div>
+
+        <div id="helpTooltip" class="help-tooltip">
+            {{ help_text | safe }}
+        </div>
+    </div>
+
+    <div class="slides-container" id="slidesContainer">
+        {% for slide in slides %}
+        <!-- DEBUG: Slide {{ loop.index }}, Has warning_strip: {{ slide.warning_strip is defined }}, Value: {{ slide.warning_strip }} -->
+
+        <div class="slide
+            {% if slide.debug_borders %}debug-mode{% endif %}"
+            data-slide-index="{{ loop.index0 }}"
+            style="{% if slide.title_font_size %}--font-title: {{ slide.title_font_size }};{% endif %}
+                    {% if slide.title_color %}--color-primary: {{ slide.title_color }};{% endif %}
+                    {% if slide.subtitle_font_size %}--font-subtitle: {{ slide.subtitle_font_size }};{% endif %}
+                    {% if slide.subtitle_color %}--color-text: {{ slide.subtitle_color }};{% endif %}">
+
+            <div class="slide-nav-buttons">
+                <button class="slide-nav-btn slide-nav-btn-home-report"
+                        data-action="home"
+                        title="Go to first slide">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                        <polyline points="9 22 9 12 15 12 15 22"/>
+                    </svg>
+                </button>
+
+                <button class="slide-nav-btn slide-nav-btn-index"
+                        data-action="index"
+                        title="Go to index">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="3" y1="12" x2="21" y2="12"/>
+                        <line x1="3" y1="6" x2="21" y2="6"/>
+                        <line x1="3" y1="18" x2="21" y2="18"/>
+                    </svg>
+                </button>
+
+                <button class="slide-nav-btn slide-nav-btn-present"
+                        data-slide-start="{{ loop.index0 }}"
+                        title="Present from here">
+                    <svg viewBox="0 0 24 24">
+                        <polygon points="5 3 19 12 5 21 5 3"/>
+                    </svg>
+                </button>
+            </div>
+
+            {% if slide.overlay %}
+            <div class="overlay-layer {{ slide.overlay.position or 'top-right' }}"
+                style="--overlay-bg: {{ slide.overlay.bg_color or 'rgba(220, 53, 69, 0.9)' }};
+                        --overlay-color: {{ slide.overlay.text_color or 'white' }};
+                        --overlay-font-size: {{ slide.overlay.font_size or '11px' }};">
+                {{ slide.overlay.text }}
+            </div>
+            {% endif %}
+
+            <!-- DEBUG: Checking warning_strip - Exists: {{ slide.warning_strip is defined }}, Has text: {{ slide.warning_strip.text if slide.warning_strip else 'N/A' }} -->
+            {% if slide.warning_strip %}
+            <!-- DEBUG: Rendering warning strip! Position: {{ slide.warning_strip.position }}, Text: {{ slide.warning_strip.text }} -->
+            <div class="warning-strip {{ slide.warning_strip.position or 'top' }}"
+                style="{% if slide.warning_strip.bg_color %}background: {{ slide.warning_strip.bg_color }};{% endif %}
+                        {% if slide.warning_strip.text_color %}color: {{ slide.warning_strip.text_color }};{% endif %}
+                        {% if slide.warning_strip.height %}height: {{ slide.warning_strip.height }}px;{% endif %}">
+                {{ slide.warning_strip.text }}
+            </div>
+            {% else %}
+            <!-- DEBUG: No warning_strip found for this slide -->
+            {% endif %}
+
+            <!-- ==== DEEP DIVE PANELS (per-slide expandable content) ==== -->
+            {% if slide.deep_dives %}
+                {% set slide_index = loop.index0 %}
+                {% for dd in slide.deep_dives %}
+                {# --- Trigger button --- #}
+                <button class="deep-dive-btn"
+                        data-overview-id="{{ dd.overview_id }}"
+                        data-slide-index="{{ slide_index }}"
+                        data-tooltip="{{ dd.button_tooltip }}"
+                        title="{{ dd.button_tooltip }}"
+                        style="top: {{ dd.button_top }}; left: {{ dd.button_left }};
+                               {% if dd.icon_width %}--dd-btn-w: {{ dd.icon_width }};{% endif %}
+                               {% if dd.icon_height %}--dd-btn-h: {{ dd.icon_height }};{% endif %}">
+                    {% if dd.button_icon.startswith('__custom__:') %}
+                        {# Custom/filled icon from svg_icons sheet — fill:currentColor from CSS is correct #}
+                        <svg viewBox="0 0 24 24">{{ dd.button_icon[11:] | safe }}</svg>
+                    {% elif dd.button_icon == 'search' %}
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    {% elif dd.button_icon == 'info' %}
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    {% elif dd.button_icon == 'chart' %}
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                    {% elif dd.button_icon == 'list' %}
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                    {% elif dd.button_icon == 'eye' %}
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    {% elif dd.button_icon == 'star' %}
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    {% elif dd.button_icon == 'zap' %}
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                    {% elif dd.button_icon == 'flag' %}
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+                    {% elif dd.button_icon == 'pin' %}
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    {% elif dd.button_icon == 'alert' %}
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    {% elif dd.button_icon == 'book' %}
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                    {% elif dd.button_icon == 'layers' %}
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+                    {% elif dd.button_icon == 'target' %}
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+                    {% else %}{# default: search+ / bugfix #}
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+                    {% endif %}
+                </button>
+
+                {# --- Panel --- #}
+                {# Side (left/right) is determined at open-time by JS reading button position #}
+                <div class="deep-dive-panel"
+                     id="dd_panel_{{ dd.overview_id }}_{{ slide_index }}"
+                     data-overview-id="{{ dd.overview_id }}"
+                     data-slide-index="{{ slide_index }}"
+                     data-btn-left="{{ dd.button_left }}"
+                     style="{% if dd.width and dd.width != 'auto' %}--dd-width: {{ dd.width }};{% endif %}
+                            {% if dd.bg_color %}--dd-bg: {{ dd.bg_color }};{% endif %}
+                            z-index: {{ dd.z_index }};">
+                    <div class="deep-dive-panel-header">
+                        <button class="deep-dive-close"
+                                data-overview-id="{{ dd.overview_id }}"
+                                data-slide-index="{{ slide_index }}"
+                                title="Close (D or Esc)">×</button>
+                        {% if dd.title %}<p class="deep-dive-panel-title">{{ dd.title | safe }}</p>{% endif %}
+                        {% if dd.subtitle %}<p class="deep-dive-panel-subtitle">{{ dd.subtitle | safe }}</p>{% endif %}
+                    </div>
+                    <div class="deep-dive-panel-body">
+                        {% for block in dd.content_blocks %}
+                            {% if block.content_type == 'heading' %}
+                                <p class="dd-block-heading">{{ block.content | safe }}</p>
+                            {% elif block.content_type == 'subheading' %}
+                                <p class="dd-block-subheading">{{ block.content | safe }}</p>
+                            {% elif block.content_type == 'paragraph' %}
+                                <p class="dd-block-paragraph">{{ block.content | safe }}</p>
+                            {% elif block.content_type == 'list_item' %}
+                                <p class="dd-block-list_item">{{ block.content | safe }}</p>
+                            {% elif block.content_type == 'divider' %}
+                                <hr class="dd-block-divider">
+                            {% elif block.content_type == 'html' %}
+                                <div class="dd-block-html">{{ block.content | safe }}</div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- ==== CUSTOM BOXES (FLOATING CONTENT) ==== -->
+            {% if slide.custom_boxes %}
+                {% set slide_index = loop.index0 %}
+                {% for box in slide.custom_boxes %}
+                <div class="custom-box box-{{ box.content_type }}"
+                    id="custom_box_{{ box.box_id }}_slide_{{ slide_index }}"
+                    data-box-id="{{ box.box_id }}"
+                    style="top: {{ box.top }};
+                            left: {{ box.left }};
+                            {% if box.width != 'auto' %}width: {{ box.width }};{% endif %}
+                            {% if box.height != 'auto' %}height: {{ box.height }};{% endif %}
+                            z-index: {{ box.z_index }};
+                            {% if box.bg_color %}background-color: {{ box.bg_color }};{% endif %}
+                            {% if box.text_color %}color: {{ box.text_color }};{% endif %}
+                            {% if box.border and box.border != 'none' %}border: {{ box.border }};{% endif %}
+                            {% if box.border_radius %}border-radius: {{ box.border_radius }};{% endif %}
+                            {% if box.padding %}padding: {{ box.padding }};{% endif %}
+                            {% if box.font_size %}font-size: {{ box.font_size }};{% endif %}
+                            {% if box.text_align %}text-align: {{ box.text_align }};{% endif %}
+                            {% if box.box_shadow and box.box_shadow != 'none' %}box-shadow: {{ box.box_shadow }};{% endif %}
+                            {% if box.opacity %}opacity: {{ box.opacity }};{% endif %}">
+                    {% if box.content_type == 'text' or box.content_type == 'html' %}
+                        {{ box.content | safe }}
+                    {% elif box.content_type == 'image' %}
+                        <img src="{{ box.content }}" alt="{{ box.box_id }}" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+                    {% endif %}
+                </div>
+                {% endfor %}
+            {% endif %}
+
+
+            <div class="top-bar">
+                <div class="slide-number">{{ loop.index }}</div>
+                <div class="slide-date">{{ current_date }}</div>
+                <div class="slide-footer">{{ slide.footer }}</div>
+                <div class="company-name">{{ company_name }}</div>
+            </div>
+
+            {% set has_header = slide.title or slide.subtitle %}
+            <div class="header-area {% if has_header %}has-content{% endif %}">
+                {% if has_header %}
+                <div class="header-top-row">
+                    <div class="title-content">
+                        {% if slide.title %}<div class="slide-title">{{ slide.title }}</div>{% endif %}
+                        {% if slide.subtitle %}<div class="slide-subtitle">{{ slide.subtitle }}</div>{% endif %}
+                    </div>
+                    <!-- DEBUG: title_image exists: {{ slide.title_image is defined }}, is_svg: {{ slide.title_image_is_svg }}, length: {{ slide.title_image|length if slide.title_image else 0 }} -->
+                    {% if slide.title_image %}
+                        {% if slide.title_image_is_svg %}
+                            <!-- DEBUG: Rendering SVG inline -->
+                            <div class="title-image title-image-svg">
+                                {{ slide.title_image | safe }}
+                            </div>
+                        {% else %}
+                            <!-- DEBUG: Rendering raster image -->
+                            <img src="{{ slide.title_image }}" alt="Logo" class="title-image" />
+                        {% endif %}
+                    {% else %}
+                        <!-- DEBUG: No title_image found -->
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="content-area layout-{{ slide.layout }} {% if has_header %}header-present{% else %}header-empty{% endif %} {% if slide.chart_scale %}custom-scale{% endif %}"
+                 {% if slide.chart_scale %}style="--first-scale: {{ slide.chart_scale[0] }}; --second-scale: {{ slide.chart_scale[1] }};"{% endif %}>
+
+                {% for chart in slide.charts %}
+                <div class="chart-container">
+                    {% if chart.type == 'text' %}
+                    <div class="text-content" data-slide-content="{{ loop.index0 }}">{{ chart.text_content | safe }}</div>
+
+                    {% elif chart.type == 'svg' %}
+                    <div class="svg-container">{{ chart.svg_content | safe }}</div>
+
+                    {% elif chart.type == 'image' %}
+                    <div class="image-container">
+                        <img src="{{ chart.image_data_uri }}" alt="Chart">
+                    </div>
+
+                    {% else %}
+                    <div id="{{ chart.container_id }}" class="chart-element"></div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="notes-area">
+                {{ slide.footnote }}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="presentation-hover-zone"></div>
+    <div id="indexOverlay" class="index-overlay">
+        <div class="index-overlay-content">
+            <div class="index-overlay-header">
+                <button class="index-overlay-close" id="indexOverlayClose" title="Close (Esc)">x</button>
+                <h2 class="index-overlay-title">Presentation Index</h2>
+                <p class="index-overlay-subtitle">Select a slide to navigate</p>
+            </div>
+
+            <div class="index-overlay-items-container">
+                <div class="index-overlay-items" id="indexOverlayItems">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NEW: Summary Overlay (Quick Insights) -->
+    <div id="summaryOverlay" class="summary-overlay">
+        <div class="summary-overlay-content">
+            <div class="summary-overlay-header">
+                <button class="summary-overlay-close" id="summaryOverlayClose" title="Close (Esc)">x</button>
+                <h2 class="summary-overlay-title">Quick Insights</h2>
+                <p class="summary-overlay-subtitle">Presentation Overview</p>
+            </div>
+
+            <div class="summary-overlay-items-container">
+                <div id="summaryOverlayItems">
+                    {% if summary_items %}
+                        {% for item in summary_items %}
+                        <div class="summary-overlay-item">
+                            <div class="summary-overlay-item-bullet">•</div>
+                            <div class="summary-overlay-item-text">{{ item | safe }}</div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="summary-overlay-item">
+                            <div class="summary-overlay-item-text" style="text-align: center; color: #999; font-style: italic;">
+                                No summary configured for this presentation.
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="presentation-controls">
+        <div class="progress-bar-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+    </div>
+
+<script>
+console.log('console is working:', typeof console.log);
+
+/* MULTI-LEVEL DEBUG SYSTEM */
+window.DEBUG_CONFIG = {
+    enabled: {{ 'true' if console_debug else 'false' }},
+    level: '{{ console_level }}',
+    levels: {
+        minimal: { errors: true, warnings: true, info: false, debug: false, verbose: false },
+        info: { errors: true, warnings: true, info: true, debug: false, verbose: false },
+        verbose: { errors: true, warnings: true, info: true, debug: true, verbose: true }
+    }
+};
+
+// Smart logging wrapper
+window.log = {
+    error: function(...args) {
+        console.error(...args);  // Always show errors
+    },
+
+    warn: function(...args) {
+        if (window.DEBUG_CONFIG.enabled &&
+            window.DEBUG_CONFIG.levels[window.DEBUG_CONFIG.level].warnings) {
+            console.warn(...args);
+        }
+    },
+
+    info: function(...args) {
+        if (window.DEBUG_CONFIG.enabled &&
+            window.DEBUG_CONFIG.levels[window.DEBUG_CONFIG.level].info) {
+            console.log('ℹ️', ...args);
+        }
+    },
+
+    debug: function(...args) {
+        if (window.DEBUG_CONFIG.enabled &&
+            window.DEBUG_CONFIG.levels[window.DEBUG_CONFIG.level].debug) {
+            console.log('🔍', ...args);
+        }
+    },
+
+    verbose: function(...args) {
+        if (window.DEBUG_CONFIG.enabled &&
+            window.DEBUG_CONFIG.levels[window.DEBUG_CONFIG.level].verbose) {
+            console.log('📋', ...args);
+        }
+    }
+};
+
+
+/* ORIGINAL CODE CONTINUES BELOW */
+console.log('===================================================');
+console.log('🎯 slidejs v2.3 - THEME PERSISTENCE & AUTO-SYNC');
+console.log('===================================================');
+
+/* CHANGE #1: THEME PERSISTENCE SETUP (localStorage) - FIXED V2 */
+(function() {
+    // Check saved theme preference
+    var savedTheme = localStorage.getItem('slidejs_theme');
+
+    // Initialize isDarkMode FIRST (will be used by toggleTheme later)
+    if (savedTheme === 'dark') {
+        window.isDarkMode = true;
+        document.body.classList.add('dark-mode');
+        console.log('🌙️ Restored dark mode from localStorage');
+    } else {
+        window.isDarkMode = false;
+        document.body.classList.remove('dark-mode');
+        console.log('🌞️ Starting in light mode');
+    }
+
+    // Update theme icon to match current mode
+    setTimeout(function() {
+        const lightIcon = document.querySelector('.theme-icon-light');
+        const darkIcon = document.querySelector('.theme-icon-dark');
+
+        if (lightIcon && darkIcon) {
+            if (window.isDarkMode) {
+                lightIcon.style.display = 'none';
+                darkIcon.style.display = 'block';
+            } else {
+                lightIcon.style.display = 'block';
+                darkIcon.style.display = 'none';
+            }
+        }
+    }, 10);
+})();
+
+
+/* CHANGE #2: THEMEABLE CHARTS REGISTRY (from Python) */
+window.themeableCharts = {{ themeable_charts | tojson | safe }};
+console.log('📊 Registered themeable charts:', window.themeableCharts.length);
+
+// ===== EXECUTE CHART SCRIPTS FIRST =====
+{{ combined_scripts | safe }}
+
+// ===== WAIT FOR CHARTS TO LOAD, THEN INITIALIZE PRESENTATION =====
+setTimeout(function() {
+    window.log.info('🚀 Initializing presentation system...');
+
+    // ===== GLOBAL VARIABLES =====
+    window.currentSlideIndex = 0;
+    window.inPresentationMode = false;
+    window.savedScrollPosition = 0;
+    window.presentationSlides = Array.from(document.querySelectorAll('.slide'));
+    window.totalSlides = window.presentationSlides.length;
+    window.sankeyInstances = new Map();
+    window.sankeyObserver = null;
+
+    window.log.info('\n📊 PRESENTATION SLIDES INITIALIZED:');
+    window.log.info('Total slides:', window.totalSlides);
+    window.presentationSlides.forEach((slide, idx) => {
+        const title = slide.querySelector('.slide-title')?.textContent || '(no title)';
+        const charts = slide.querySelectorAll('.chart-container').length;
+        const boxes = slide.querySelectorAll('.custom-box').length;
+        const dataIndex = slide.getAttribute('data-slide-index');
+        window.log.debug(`   [${idx}] data-index="${dataIndex}" title="${title}" charts=${charts} boxes=${boxes}`);
+    });
+    window.log.info('');
+
+    // ===== UTILITY FUNCTIONS =====
+    window.scrollToSlide = function(index) {
+        if (index >= 0 && index < window.totalSlides) {
+            window.presentationSlides[index].scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    };
+
+    window.getCurrentSlideInViewport = function() {
+        const viewportCenter = window.innerHeight / 2;
+        let closestSlide = 0;
+        let minDistance = Infinity;
+
+        window.presentationSlides.forEach((slide, index) => {
+            const rect = slide.getBoundingClientRect();
+            const slideCenter = rect.top + (rect.height / 2);
+            const distance = Math.abs(slideCenter - viewportCenter);
+
+            if (distance < minDistance) {
+                minDistance = distance;
+                closestSlide = index;
+            }
+        });
+
+        return closestSlide;
+    };
+
+    /* ================
+        CHANGE #3: SYNC ALL CHARTS TO CURRENT THEME
+       ================ */
+    window.syncAllChartsTheme = function() {
+        if (!window.themeableCharts || window.themeableCharts.length === 0) {
+            console.log('ℹ️  No themeable charts to sync');
+            return;
+        }
+
+        console.log('🔄 Syncing ' + window.themeableCharts.length + ' chart(s) to theme:', window.isDarkMode ? 'dark' : 'light');
+
+        var syncedCount = 0;
+        window.themeableCharts.forEach(function(chart) {
+            if (window[chart.function_name]) {
+                try {
+                    window[chart.function_name](window.isDarkMode);
+                    syncedCount++;
+                } catch(err) {
+                    console.error('❌ Failed to sync chart:', chart.container_id, err);
+                }
+            } else {
+                console.warn('⚠️  Theme function not found:', chart.function_name);
+            }
+        });
+
+        console.log('✅ Synced ' + syncedCount + ' chart(s) successfully');
+    };
+
+
+    /* CHANGE #4: INITIAL SYNC ON PAGE LOAD */
+    window.syncAllChartsTheme();
+
+    // ===== CRITICAL: FORCE SANKEY CURVES VISIBLE (FIXED VERSION) =====
+    window.forceSankeyCurvesVisible = function(targetSlideIndex = null) {
+        const slideIndex = targetSlideIndex !== null ? targetSlideIndex : window.currentSlideIndex;
+        const currentSlide = window.presentationSlides[slideIndex];
+
+        if (!currentSlide) {
+            window.log.warn(`  ⚠️ No slide found at index ${slideIndex}`);
+            return;
+        }
+
+        window.log.verbose(`🔧 Forcing Sankey curves visible (Slide ${slideIndex + 1})...`);
+
+        const svgs = currentSlide.querySelectorAll('svg');
+        window.log.verbose(`  Found ${svgs.length} SVG(s) in slide ${slideIndex + 1}`);
+
+        let fixedCount = 0;
+
+        svgs.forEach((svg, idx) => {
+            const sankeyLinks = svg.querySelectorAll('.sankey-link');
+
+            if (sankeyLinks.length === 0) {
+                return;
+            }
+
+            window.log.verbose(`  📊 Processing Sankey SVG ${idx + 1}: ${sankeyLinks.length} links`);
+
+            svg.style.overflow = 'visible';
+            svg.style.setProperty('overflow', 'visible', 'important');
+
+            sankeyLinks.forEach((link, linkIdx) => {
+                const pathData = link.getAttribute('d');
+
+                if (!pathData || pathData.length < 20) {
+                    return;
+                }
+
+                let currentStroke = parseFloat(link.style.strokeWidth) || 0;
+
+                if (currentStroke === 0) {
+                    const computedStyle = window.getComputedStyle(link);
+                    currentStroke = parseFloat(computedStyle.strokeWidth) || 0;
+                }
+
+                const shouldFix = window.inPresentationMode || currentStroke < 1;
+
+                if (shouldFix) {
+                    const pathLength = link.getTotalLength ? link.getTotalLength() : 100;
+                    const appropriateStroke = Math.max(8, Math.min(14, pathLength / 50));
+
+                    link.setAttribute('style',
+                        `stroke-width: ${appropriateStroke}px !important; ` +
+                        `opacity: 0.6 !important; ` +
+                        `display: block !important; ` +
+                        `visibility: visible !important; ` +
+                        `pointer-events: auto !important;`
+                    );
+
+                    fixedCount++;
+                    window.log.verbose(`    ✓ Fixed link ${linkIdx + 1}: ${currentStroke}px → ${appropriateStroke}px`);
+                }
+
+                const computedStyle = window.getComputedStyle(link);
+                if (computedStyle.fill !== 'none' && computedStyle.fill !== 'rgba(0, 0, 0, 0)') {
+                    link.style.fillOpacity = '0.6';
+                }
+            });
+
+            svg.style.display = 'none';
+            svg.offsetHeight;
+            svg.style.display = 'block';
+
+            const containerId = svg.closest('[id^="chart_container_"]')?.id || `sankey_${slideIndex}_${idx}`;
+            window.sankeyInstances.set(containerId, svg);
+        });
+
+        window.log.verbose(`✅ Sankey fix complete: ${fixedCount} link(s) fixed in slide ${slideIndex + 1}`);
+    };
+
+    // ===== SANKEY MUTATION OBSERVER =====
+    window.initSankeyObserver = function() {
+        if (window.sankeyObserver) {
+            return;
+        }
+
+        window.log.info('👀 Initializing Sankey MutationObserver...');
+
+        window.sankeyObserver = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                mutation.addedNodes.forEach(function(node) {
+                    if (node.nodeName === 'svg' || (node.querySelector && node.querySelector('svg'))) {
+                        const svg = node.nodeName === 'svg' ? node : node.querySelector('svg');
+                        if (svg && svg.querySelector('.sankey-link')) {
+                            window.log.verbose('🔍 Detected Sankey SVG addition, forcing visibility...');
+                            setTimeout(() => window.forceSankeyCurvesVisible(), 100);
+                        }
+                    }
+                });
+
+                if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                    const target = mutation.target;
+                    if (target.classList.contains('sankey-link')) {
+                        const strokeWidth = parseFloat(window.getComputedStyle(target).strokeWidth) || 0;
+                        if (strokeWidth < 1) {
+                            window.log.verbose('⚠️ Detected zero stroke-width, fixing...');
+                            setTimeout(() => window.forceSankeyCurvesVisible(), 50);
+                        }
+                    }
+                }
+            });
+        });
+
+        window.presentationSlides.forEach(slide => {
+            window.sankeyObserver.observe(slide, {
+                childList: true,
+                subtree: true,
+                attributes: true,
+                attributeFilter: ['style', 'stroke-width']
+            });
+        });
+
+        window.log.info('✅ Sankey observer active on all slides');
+    };
+
+    // ===== SHOW SLIDE FUNCTION =====
+    window.showSlide = function(index) {
+        window.log.debug('\n========================================');
+        window.log.debug(`📍 showSlide CALLED with index: ${index}`);
+        window.log.debug(`   Current index before: ${window.currentSlideIndex}`);
+        window.log.debug(`   Total slides: ${window.totalSlides}`);
+        window.log.debug(`   In presentation mode: ${window.inPresentationMode}`);
+
+        if (index < 0) index = 0;
+        if (index >= window.totalSlides) index = window.totalSlides - 1;
+
+        window.currentSlideIndex = index;
+        window.log.debug(`   Setting currentSlideIndex to: ${window.currentSlideIndex}`);
+
+        // Show which slides are being toggled
+        let activatedSlide = null;
+        window.presentationSlides.forEach((slide, idx) => {
+            const wasActive = slide.classList.contains('active-slide');
+
+            if (idx === window.currentSlideIndex) {
+                slide.classList.add('active-slide');
+                activatedSlide = slide;
+                window.log.debug(`   ✅ ACTIVATED slide ${idx} (was: ${wasActive})`);
+            } else {
+                slide.classList.remove('active-slide');
+                if (wasActive) {
+                    window.log.debug(`   ❌ DEACTIVATED slide ${idx}`);
+                }
+            }
+        });
+
+        if (!activatedSlide) {
+            console.error(`   ⚠️  ERROR: No slide found at index ${window.currentSlideIndex}!`);
+        } else {
+            // Check if slide has content
+            const hasTitle = activatedSlide.querySelector('.slide-title');
+            const hasCharts = activatedSlide.querySelectorAll('.chart-container').length;
+            const hasCustomBoxes = activatedSlide.querySelectorAll('.custom-box').length;
+            const computedDisplay = window.getComputedStyle(activatedSlide).display;
+
+            window.log.debug(`   📊 Activated slide details:`);
+            console.log(`     • Title: ${hasTitle ? hasTitle.textContent : '(none)'}`);
+            console.log(`     • Charts: ${hasCharts}`);
+            console.log(`     • Custom boxes: ${hasCustomBoxes}`);
+            console.log(`     • Computed display: ${computedDisplay}`);
+        }
+
+        if (window.inPresentationMode) {
+            const currentSlide = window.presentationSlides[window.currentSlideIndex];
+            const windowWidth = window.innerWidth;
+            const windowHeight = window.innerHeight;
+            const slideWidth = {{ slide_width }};
+            const slideHeight = {{ slide_height }};
+
+            const scaleX = windowWidth / slideWidth;
+            const scaleY = windowHeight / slideHeight;
+            const scale = Math.min(scaleX, scaleY);
+
+            currentSlide.style.transformOrigin = 'center center';
+            currentSlide.style.transform = `scale(${scale})`;
+
+            window.log.debug(`   🎨 Applied scale: ${scale.toFixed(3)}`);
+        }
+
+        const progress = ((window.currentSlideIndex + 1) / window.totalSlides) * 100;
+        document.getElementById('progressBar').style.width = `${progress}%`;
+
+        window.log.debug(`   ✓ Progress bar: ${progress.toFixed(1)}%`);
+        window.log.debug('==========================================\n');
+    };
+
+    // === ENTER PRESENTATION MODE ===
+    window.enterPresentationMode = function() {
+        window.log.info('\n🎬 ENTERING PRESENTATION MODE');
+        window.log.info(`  Current slide index: ${window.currentSlideIndex}`);
+        window.log.info(`  Total slides: ${window.totalSlides}`);
+
+        window.savedScrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+
+        window.inPresentationMode = true;
+        document.body.classList.add('presentation-mode');
+        window.log.debug('  ✅ Added presentation-mode class to body');
+
+        window.presentationSlides.forEach((slide, idx) => {
+            slide.classList.remove('active-slide');
+            slide.style.transform = '';
+            window.log.debug(`  🔄 Reset slide ${idx + 1}`);
+        });
+
+        window.showSlide(window.currentSlideIndex);
+
+        setTimeout(() => {
+            window.log.verbose('🔄 Forcing ALL Sankey instances visible (pass 1)...'); // FIXED
+            window.presentationSlides.forEach((slide, idx) => {
+                const hasSankey = slide.querySelector('.sankey-link') !== null;
+                if (hasSankey) {
+                    window.forceSankeyCurvesVisible(idx);
+                }
+            });
+        }, 300);
+
+        setTimeout(() => {
+            window.log.verbose('🔄 Forcing ALL Sankey instances visible (pass 2)...'); // FIXED
+            window.presentationSlides.forEach((slide, idx) => {
+                const hasSankey = slide.querySelector('.sankey-link') !== null;
+                if (hasSankey) {
+                    window.forceSankeyCurvesVisible(idx);
+                }
+            });
+        }, 800);
+
+        const elem = document.documentElement;
+        if (elem.requestFullscreen) {
+            elem.requestFullscreen().catch(err => console.warn('Fullscreen failed:', err));
+        }
+
+        window.log.info('✅ Presentation mode ACTIVE');
+    };
+
+    // === EXIT PRESENTATION MODE ===
+    window.exitPresentationMode = function() {
+        console.log('\n🎬 EXITING PRESENTATION MODE');
+
+        window.inPresentationMode = false;
+        document.body.classList.remove('presentation-mode');
+
+        window.presentationSlides.forEach(slide => {
+            slide.classList.remove('active-slide');
+            slide.style.transform = '';
+            // Clear any inline display style left on SVGs by forceSankeyCurvesVisible
+            slide.querySelectorAll('svg').forEach(svg => {
+                svg.style.display = '';
+            });
+        });
+
+        if (document.fullscreenElement) {
+            document.exitFullscreen().catch(err => console.warn('Exit fullscreen failed:', err));
+        }
+
+        document.getElementById('progressBar').style.width = '0%';
+
+        setTimeout(() => {
+            window.scrollTo({ top: window.savedScrollPosition, behavior: 'smooth' });
+        }, 100);
+
+        // Redraw all themeable charts to recover any that went blank during presentation
+        setTimeout(() => {
+            if (typeof window.syncAllChartsTheme === 'function') {
+                window.syncAllChartsTheme();
+                console.log('🔄 Charts resynced after exit presentation mode');
+            }
+        }, 200);
+    };
+
+    window.nextSlide = function() {
+        window.log.debug('🟢  nextSlide() called');
+        window.log.debug(`   Current index: ${window.currentSlideIndex}`);
+        window.log.debug(`   Can advance: ${window.currentSlideIndex < window.totalSlides - 1}`);
+
+        if (window.currentSlideIndex < window.totalSlides - 1) {
+            const newIndex = window.currentSlideIndex + 1;
+            window.log.debug(`  → Calling showSlide(${newIndex})`);
+            window.showSlide(newIndex);
+        } else {
+            window.log.debug('  ⚠️  Already at last slide');
+        }
+    };
+
+    window.prevSlide = function() {
+        window.log.debug(' 🟡 prevSlide() called');
+        window.log.debug(`   Current index: ${window.currentSlideIndex}`);
+        window.log.debug(`   Can go back: ${window.currentSlideIndex > 0}`);
+
+        if (window.currentSlideIndex > 0) {
+            const newIndex = window.currentSlideIndex - 1;
+            window.log.debug(`  → Calling showSlide(${newIndex})`);
+            window.showSlide(newIndex);
+        } else {
+            window.log.debug('   ⚠️  Already at first slide');
+        }
+    };
+
+    // ==== INITIALIZE ====
+    window.initSankeyObserver();
+
+    // ==== INITIAL FIX (Report Mode) ====
+    setTimeout(() => {
+        window.log.info('🔄 Initial Sankey visibility check (all slides)...');
+
+        // ⚠️ OPTIMIZATION: Only check slides that actually have Sankey links
+        let sankeySlideCount = 0;
+        window.presentationSlides.forEach((slide, idx) => {
+            const hasSankey = slide.querySelector('.sankey-link') !== null;
+            if (hasSankey) {
+                sankeySlideCount++;
+                window.forceSankeyCurvesVisible(idx);
+            }
+        });
+
+        if (sankeySlideCount > 0) {
+            window.log.info(`✅ Checked ${sankeySlideCount} slide(s) with Sankey diagrams`);
+        } else {
+            window.log.info('ℹ️  No Sankey diagrams detected, skipping checks');
+        }
+    }, 1000);
+
+
+    // === AGENDA LINK PROCESSING ===
+    window.processAgendaLinks = function() {
+        console.log('🔗 Processing agenda links...');
+
+        document.querySelectorAll('[data-slide-target]').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetIndex = parseInt(item.dataset.slideTarget);
+
+                if (window.inPresentationMode) {
+                    window.showSlide(targetIndex);
+                } else {
+                    window.scrollToSlide(targetIndex);
+                }
+            });
+        });
+
+        console.log('✅ Agenda links processed');
+    };
+
+    // === SLIDE NAVIGATION BUTTONS ===
+    (function() {
+        document.querySelectorAll('.slide-nav-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const action = btn.dataset.action;
+                const slideStart = btn.dataset.slideStart;
+
+                if (action === 'home') {
+                    if (window.inPresentationMode) {
+                        window.showSlide(0);
+                    } else {
+                        window.scrollToSlide(0);
+                    }
+                } else if (action === 'index') {
+                    if (typeof window.openIndexOverlay === 'function') {
+                        window.openIndexOverlay();
+                    } else {
+                        if (window.inPresentationMode) {
+                            window.showSlide(0);
+                        } else {
+                            window.scrollToSlide(0);
+                        }
+                    }
+                } else if (slideStart !== undefined) {
+                    window.currentSlideIndex = parseInt(slideStart);
+                    window.enterPresentationMode();
+                }
+            });
+        });
+
+        console.log('✅ Navigation buttons initialized');
+    })();
+
+    // ==== HELP TOOLTIP ====
+    (function() {
+        const helpBtn = document.getElementById('helpBtn');
+        const helpTooltip = document.getElementById('helpTooltip');
+
+        if (helpBtn && helpTooltip) {
+            helpBtn.addEventListener('mouseenter', () => {
+                helpTooltip.classList.add('active');
+            });
+
+            helpBtn.addEventListener('mouseleave', () => {
+                helpTooltip.classList.remove('active');
+            });
+
+            console.log('✅ Help tooltip initialized');
+        }
+    })();
+
+    // === INDEX OVERLAY MODAL ====
+    (function() {
+        const indexOverlay = document.getElementById('indexOverlay');
+        const indexOverlayItems = document.getElementById('indexOverlayItems');
+        const indexOverlayClose = document.getElementById('indexOverlayClose');
+
+        if (!indexOverlay || !indexOverlayItems) {
+            console.warn('⚠️  Index overlay elements not found');
+            return;
+        }
+
+        function buildIndexOverlay() {
+            const agendaItems = document.querySelectorAll('[data-slide-target]');
+
+            if (agendaItems.length === 0) {
+                console.log('ℹ️  No agenda items found');
+                return;
+            }
+
+            indexOverlayItems.innerHTML = '';
+
+            // Get configuration
+            const indexColumns = '{{ index_columns }}'; // NEW: Get from template
+            const itemCount = agendaItems.length;
+
+            // Calculate columns (similar to agenda slide logic)
+            let columns;
+            if (indexColumns === 'auto') {
+                if (itemCount <= 8) {
+                    columns = 1;
+                } else if (itemCount <= 16) {
+                    columns = 2;
+                } else if (itemCount <= 28) {
+                    columns = 3;
+                } else {
+                    columns = 4;
+                }
+            } else {
+                columns = parseInt(indexColumns);
+                columns = Math.max(1, Math.min(4, columns));
+            }
+
+            // Apply grid layout
+            if (columns === 1) {
+                indexOverlayItems.style.display = 'flex';
+                indexOverlayItems.style.flexDirection = 'column';
+                indexOverlayItems.style.gap = '6px';
+            } else {
+                indexOverlayItems.style.display = 'grid';
+                indexOverlayItems.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
+                indexOverlayItems.style.gap = '8px 20px';
+                indexOverlayItems.style.alignItems = 'start';
+            }
+
+            console.log(`✅ Index overlay: ${columns} column(s) for ${itemCount} items`);
+
+            const itemsData = [];
+            agendaItems.forEach(item => {
+                const slideTarget = parseInt(item.dataset.slideTarget);
+                const slideNumber = slideTarget + 1;
+                const textElement = item.querySelector('.agenda-item-text');
+                const itemText = textElement ? textElement.innerHTML : item.textContent;
+
+                let groupName = null;
+                let prevSibling = item.previousElementSibling;
+                if (prevSibling && prevSibling.classList.contains('agenda-group-heading')) {
+                    groupName = prevSibling.textContent;
+                }
+
+                itemsData.push({
+                    slideTarget: slideTarget,
+                    slideNumber: slideNumber,
+                    text: itemText,
+                    group: groupName
+                });
+            });
+
+            let currentGroup = null;
+
+            itemsData.forEach(item => {
+                if (item.group && item.group !== currentGroup) {
+                    const groupHeading = document.createElement('div');
+                    groupHeading.className = 'index-overlay-group-heading';
+                    groupHeading.textContent = item.group;
+                    indexOverlayItems.appendChild(groupHeading);
+                    currentGroup = item.group;
+                } else if (!item.group && currentGroup !== null) {
+                    currentGroup = null;
+                }
+
+                const overlayItem = document.createElement('div');
+                overlayItem.className = 'index-overlay-item';
+                overlayItem.dataset.slideTarget = item.slideTarget;
+
+                overlayItem.innerHTML = `
+                    <div class="index-overlay-item-number">${item.slideNumber}</div>
+                    <div class="index-overlay-item-text">${item.text}</div>
+                `;
+
+                overlayItem.addEventListener('click', () => {
+                    closeIndexOverlay();
+                    if (window.inPresentationMode) {
+                        window.showSlide(item.slideTarget);
+                    } else {
+                        window.scrollToSlide(item.slideTarget);
+                    }
+                });
+
+                indexOverlayItems.appendChild(overlayItem);
+            });
+
+            console.log(`✅ Grouped index overlay built: ${itemsData.length} items`);
+        }
+
+        function openIndexOverlay() {
+            indexOverlay.classList.add('active');
+            document.body.setAttribute('data-index-overlay-open', 'true');
+            console.log('📋 Index overlay opened');
+        }
+
+        function closeIndexOverlay() {
+            indexOverlay.classList.remove('active');
+            document.body.removeAttribute('data-index-overlay-open');
+            console.log('📋 Index overlay closed');
+        }
+
+        if (indexOverlayClose) {
+            indexOverlayClose.addEventListener('click', closeIndexOverlay);
+        }
+
+        indexOverlay.addEventListener('click', (e) => {
+            if (e.target === indexOverlay) {
+                closeIndexOverlay();
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const isOverlayOpen = document.body.hasAttribute('data-index-overlay-open');
+                if (isOverlayOpen) {
+                    console.log('🛑 Escape intercepted by index overlay handler (CAPTURE phase)');
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    closeIndexOverlay();
+                    return false;
+                }
+            }
+        }, true);
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const isSummaryOpen = document.body.hasAttribute('data-summary-overlay-open');
+                if (isSummaryOpen) {
+                    console.log('🛑 Escape intercepted by summary overlay handler');
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    closeSummaryOverlay();
+                    return false;
+                }
+            }
+        }, true);
+
+        buildIndexOverlay();
+        window.openIndexOverlay = openIndexOverlay;
+        window.closeIndexOverlay = closeIndexOverlay;
+        console.log('✅ Grouped index overlay initialized with capture-phase Escape handler');
+    })();
+
+    //==== SUMMARY OVERLAY (Quick Insights) ====
+    (function() {
+        const summaryOverlay = document.getElementById('summaryOverlay');
+        const summaryOverlayClose = document.getElementById('summaryOverlayClose');
+
+        if (!summaryOverlay) {
+            console.warn('⚠️  Summary overlay element not found');
+            return;
+        }
+
+        function openSummaryOverlay() {
+            summaryOverlay.classList.add('active');
+            document.body.setAttribute('data-summary-overlay-open', 'true');
+            console.log('📊 Summary overlay opened');
+        }
+
+        function closeSummaryOverlay() {
+            summaryOverlay.classList.remove('active');
+            document.body.removeAttribute('data-summary-overlay-open');
+            console.log('📊 Summary overlay closed');
+        }
+
+        if (summaryOverlayClose) {
+            summaryOverlayClose.addEventListener('click', closeSummaryOverlay);
+        }
+
+        summaryOverlay.addEventListener('click', (e) => {
+            if (e.target === summaryOverlay) {
+                closeSummaryOverlay();
+            }
+        });
+
+        window.openSummaryOverlay = openSummaryOverlay;
+        window.closeSummaryOverlay = closeSummaryOverlay;
+
+        console.log('✅ Summary overlay (Quick Insights) initialized');
+    })();
+
+
+    //==== DEEP DIVE PANELS ====
+    (function() {
+
+        // Track which panel is open per slide: slideIndex → overviewId | null
+        window.deepDiveState = {};
+
+        function getPanelEl(slideIndex, overviewId) {
+            return document.getElementById(`dd_panel_${overviewId}_${slideIndex}`);
+        }
+
+        function openDeepDive(slideIndex, overviewId) {
+            // Close any already-open panel on this slide first
+            closeDeepDiveOnSlide(slideIndex, true);
+
+            const panel = getPanelEl(slideIndex, overviewId);
+            if (!panel) return;
+
+            // ── Determine which side to pin the curtain to ──
+            // We read the button's CSS left value (e.g. "1220px") from data-btn-left
+            // and compare it to half the slide width (in slide-space, not screen-space).
+            // This works correctly regardless of CSS scale transform.
+            const slideWidth = {{ slide_width }};  // injected by Python
+            let btnLeft = 0;
+
+            // Try getting the value from the panel's own data attribute (set at render time)
+            const btnLeftRaw = panel.dataset.btnLeft || '';
+            if (btnLeftRaw) {
+                // Parse "1220px" → 1220, "60%" → 0.6 * slideWidth
+                const numMatch = btnLeftRaw.match(/([\d.]+)\s*(px|%)?/);
+                if (numMatch) {
+                    btnLeft = parseFloat(numMatch[1]);
+                    if (numMatch[2] === '%') btnLeft = (btnLeft / 100) * slideWidth;
+                }
+            }
+
+            const onRightHalf = btnLeft >= slideWidth / 2;
+            panel.classList.remove('dd-side-left', 'dd-side-right');
+            panel.classList.add(onRightHalf ? 'dd-side-right' : 'dd-side-left');
+
+            panel.classList.add('dd-active');
+            window.deepDiveState[slideIndex] = overviewId;
+            document.body.setAttribute('data-deep-dive-open', 'true');
+            console.log(`🔍 Deep Dive opened: slide=${slideIndex}, id=${overviewId}, side=${onRightHalf ? 'right' : 'left'}`);
+        }
+
+        function closeDeepDiveOnSlide(slideIndex, silent) {
+            const openId = window.deepDiveState[slideIndex];
+            if (!openId) return;
+            const panel = getPanelEl(slideIndex, openId);
+            if (panel) panel.classList.remove('dd-active');
+            delete window.deepDiveState[slideIndex];
+
+            // Only clear body attribute if NO other slide has an open panel
+            if (Object.keys(window.deepDiveState).length === 0) {
+                document.body.removeAttribute('data-deep-dive-open');
+            }
+            if (!silent) console.log(`🔍 Deep Dive closed: slide=${slideIndex}`);
+        }
+
+        function closeAllDeepDives() {
+            Object.keys(window.deepDiveState).forEach(idx => {
+                closeDeepDiveOnSlide(parseInt(idx), true);
+            });
+            document.body.removeAttribute('data-deep-dive-open');
+            console.log('🔍 All Deep Dives closed');
+        }
+
+        // Toggle: if same panel is open → close it; if a different one / none → open it
+        function toggleDeepDive(slideIndex, overviewId) {
+            if (window.deepDiveState[slideIndex] === overviewId) {
+                closeDeepDiveOnSlide(slideIndex);
+            } else {
+                openDeepDive(slideIndex, overviewId);
+            }
+        }
+
+        // Resolve the "current" slide index in both report and presentation modes
+        function currentSlideForDeepDive() {
+            if (window.inPresentationMode) {
+                return window.currentSlideIndex;
+            }
+            // Report mode: slide whose center is closest to viewport center
+            return window.getCurrentSlideInViewport ? window.getCurrentSlideInViewport() : 0;
+        }
+
+        // --- Trigger button clicks ---
+        document.querySelectorAll('.deep-dive-btn').forEach(btn => {
+            btn.addEventListener('click', e => {
+                e.stopPropagation();
+                const slideIndex = parseInt(btn.dataset.slideIndex);
+                const overviewId = btn.dataset.overviewId;
+                toggleDeepDive(slideIndex, overviewId);
+            });
+        });
+
+        // --- Close button clicks ---
+        document.querySelectorAll('.deep-dive-close').forEach(btn => {
+            btn.addEventListener('click', e => {
+                e.stopPropagation();
+                const slideIndex = parseInt(btn.dataset.slideIndex);
+                closeDeepDiveOnSlide(slideIndex);
+            });
+        });
+
+        // --- D key: toggle first (or already-open) deep dive on current slide ---
+        document.addEventListener('keydown', e => {
+            if (e.key !== 'd' && e.key !== 'D') return;
+            if (e.ctrlKey || e.metaKey || e.altKey) return;
+            // Don't fire while typing in an input
+            const tag = document.activeElement && document.activeElement.tagName;
+            if (tag === 'INPUT' || tag === 'TEXTAREA' || document.activeElement.isContentEditable) return;
+
+            // Don't fire if other overlays are open
+            if (document.body.hasAttribute('data-index-overlay-open')) return;
+            if (document.body.hasAttribute('data-summary-overlay-open')) return;
+
+            e.preventDefault();
+            e.stopImmediatePropagation();
+
+            const slideIndex = currentSlideForDeepDive();
+            const slide = window.presentationSlides && window.presentationSlides[slideIndex];
+            if (!slide) return;
+
+            // If a panel is already open on this slide, close it
+            if (window.deepDiveState[slideIndex]) {
+                closeDeepDiveOnSlide(slideIndex);
+                return;
+            }
+
+            // Otherwise open the first deep-dive panel found on this slide
+            const firstBtn = slide.querySelector('.deep-dive-btn');
+            if (firstBtn) {
+                const overviewId = firstBtn.dataset.overviewId;
+                openDeepDive(slideIndex, overviewId);
+            }
+        }, true); // capture phase so it fires before other handlers
+
+        // --- Escape: close open deep dive before anything else ---
+        document.addEventListener('keydown', e => {
+            if (e.key !== 'Escape') return;
+            if (document.body.hasAttribute('data-deep-dive-open')) {
+                console.log('🛑 Escape intercepted by deep-dive handler');
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                closeAllDeepDives();
+                return false;
+            }
+        }, true);
+
+        // Expose for external use
+        window.openDeepDive = openDeepDive;
+        window.closeDeepDiveOnSlide = closeDeepDiveOnSlide;
+        window.closeAllDeepDives = closeAllDeepDives;
+
+        console.log('✅ Deep Dive panels initialized');
+    })();
+
+
+    /* CHANGE #5: MODIFIED toggleTheme WITH localStorage & syncAllChartsTheme */
+    window.toggleTheme = function() {
+        window.isDarkMode = !window.isDarkMode;
+        document.body.classList.toggle('dark-mode');
+
+        // Save preference to localStorage
+        localStorage.setItem('slidejs_theme', window.isDarkMode ? 'dark' : 'light');
+        console.log('💾 Saved theme preference:', window.isDarkMode ? 'dark' : 'light');
+
+        const lightIcon = document.querySelector('.theme-icon-light');
+        const darkIcon = document.querySelector('.theme-icon-dark');
+
+        if (lightIcon && darkIcon) {
+            if (window.isDarkMode) {
+                lightIcon.style.display = 'none';
+                darkIcon.style.display = 'block';
+            } else {
+                lightIcon.style.display = 'block';
+                darkIcon.style.display = 'none';
+            }
+        }
+
+        // NEW: Update all themeable charts
+        window.syncAllChartsTheme();
+
+        console.log('🎨 Theme toggled:', window.isDarkMode ? 'Dark' : 'Light');
+    };
+
+    // === EVENT LISTENERS ===
+    const imgBtn = document.getElementById('imgBtn');
+    if (imgBtn) imgBtn.addEventListener('click', downloadAsImage);
+
+    const pdfBtn = document.getElementById('pdfBtn');
+    if (pdfBtn) pdfBtn.addEventListener('click', downloadAsPDF);
+
+    const themeBtn = document.getElementById('themeBtn');
+    if (themeBtn) themeBtn.addEventListener('click', window.toggleTheme);
+
+    const presentBtn = document.getElementById('presentBtn');
+    if (presentBtn) {
+        presentBtn.addEventListener('click', () => {
+            console.log('🎯 Present button clicked - starting from slide 0');
+            window.currentSlideIndex = 0;
+            window.enterPresentationMode();
+        });
+        console.log('✅ Present button listener attached');
+    } else {
+        console.error('❌ Present button not found!');
+    }
+
+    // KEYBOARD SHORTCUTS
+    document.addEventListener('keydown', (e) => {
+        // Never intercept shortcuts while the user is typing in an input or textarea
+        const tag = document.activeElement && document.activeElement.tagName;
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || document.activeElement.isContentEditable) {
+            return;
+        }
+
+        // Special keys (work in both modes)
+        if (e.key === 'h' || e.key === 'H') {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            window.showSlide(0);
+            return;
+        }
+
+        if (e.key === 'i' || e.key === 'I') {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            if (document.body.hasAttribute('data-index-overlay-open')) {
+                if (typeof window.closeIndexOverlay === 'function') window.closeIndexOverlay();
+            } else {
+                if (typeof window.openIndexOverlay === 'function') window.openIndexOverlay();
+                else window.showSlide(0);
+            }
+            return;
+        }
+
+        if (e.key === 'q' || e.key === 'Q') {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            if (document.body.hasAttribute('data-summary-overlay-open')) {
+                if (typeof window.closeSummaryOverlay === 'function') window.closeSummaryOverlay();
+            } else {
+                if (typeof window.openSummaryOverlay === 'function') window.openSummaryOverlay();
+            }
+            return;
+        }
+
+        // NEW: Toggle console debug with Ctrl+D
+        if (e.ctrlKey && e.key === 'd') {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            window.DEBUG_CONFIG.enabled = !window.DEBUG_CONFIG.enabled;
+            console.log(`💻 Console debug ${window.DEBUG_CONFIG.enabled ? 'ENABLED' : 'DISABLED'}`);
+            return;
+        }
+
+        // Toggle theme with T key
+        if (e.key === 't' || e.key === 'T') {
+            e.preventDefault();
+            window.toggleTheme();
+            return;
+        }
+
+        // NEW: Cycle debug level with Ctrl+L
+        if (e.ctrlKey && e.key === 'l') {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            const levels = ['minimal', 'info', 'verbose'];
+            const currentIndex = levels.indexOf(window.DEBUG_CONFIG.level);
+            window.DEBUG_CONFIG.level = levels[(currentIndex + 1) % levels.length];
+            console.log(`📊 Console level: ${window.DEBUG_CONFIG.level.toUpperCase()}`);
+            return;
+        }
+
+        if (e.key === 'p' || e.key === 'P') {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            if (window.inPresentationMode) {
+                window.exitPresentationMode();
+            } else {
+                window.currentSlideIndex = window.getCurrentSlideInViewport();
+                window.enterPresentationMode();
+            }
+            return;
+        }
+
+        if (e.key === 'Escape') {
+            const isIndexOpen = document.body.hasAttribute('data-index-overlay-open');
+            const isSummaryOpen = document.body.hasAttribute('data-summary-overlay-open');
+            const isDeepDiveOpen = document.body.hasAttribute('data-deep-dive-open');
+
+            if (isIndexOpen || isSummaryOpen || isDeepDiveOpen) {
+                console.log('⏩ Escape ignored by main handler (overlay is open)');
+                return;
+            }
+
+            e.preventDefault();
+            e.stopImmediatePropagation();
+
+            if (window.inPresentationMode) {
+                window.exitPresentationMode();
+                console.log('🎬 Exited presentation mode (Escape key)');
+            }
+            return;
+        }
+
+        if (!window.inPresentationMode) return;
+
+        // ADD THIS GUARD: If any overlay is open, don't handle navigation
+        const isOverlayOpen = document.body.hasAttribute('data-index-overlay-open') ||
+                            document.body.hasAttribute('data-summary-overlay-open') ||
+                            document.body.hasAttribute('data-deep-dive-open');
+        if (isOverlayOpen) {
+            return;
+        }
+
+        switch(e.key) {
+            case 'ArrowRight':
+            case 'ArrowDown':
+            case 'PageDown':
+            case ' ':
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                window.nextSlide();
+                break;
+            case 'ArrowLeft':
+            case 'ArrowUp':
+            case 'PageUp':
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                window.prevSlide();
+                break;
+            case 'Home':
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                window.showSlide(0);
+                break;
+            case 'End':
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                window.showSlide(window.totalSlides - 1);
+                break;
+        }
+    });
+
+    document.addEventListener('fullscreenchange', () => {
+        if (!document.fullscreenElement && window.inPresentationMode) {
+            window.exitPresentationMode();
+        }
+    });
+
+    window.addEventListener('resize', () => {
+        if (window.inPresentationMode) {
+            window.showSlide(window.currentSlideIndex);
+        }
+    });
+
+    window.processAgendaLinks();
+
+    if (typeof echarts !== 'undefined') {
+        const allCharts = document.querySelectorAll('.chart-element, [id^="chart_container_"]');
+        allCharts.forEach(container => {
+            const chartInstance = echarts.getInstanceByDom(container);
+            if (chartInstance) {
+                chartInstance.resize();
+            }
+        });
+        console.log('🔄 Initial chart resize complete');
+    }
+
+    console.log('✅ Presentation system ready!');
+    console.log('⌨️  Shortcuts: H=Home, I=Index, Q=Quick Insights, D=Deep Dive, P=Present, Arrows=Navigate, Esc=Exit');
+
+}, 500);
+
+async function downloadAsImage() {
+    // Keep your existing implementation
+}
+
+async function downloadAsPDF() {
+    // Keep your existing implementation
+}
+
+</script>
+</body>
+</html>

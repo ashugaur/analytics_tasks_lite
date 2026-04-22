@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chart Name</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+    <style>
+        body { margin: 0; padding: 0; background: #f9f9f9; }
+        #container { width: 100%; height: 100%; min-height: 400px; }
+    </style>
+</head>
+<body>
+    <div id="container"></div>
+
+    <script>
+        var dom = document.getElementById('container');
+        var myChart = echarts.init(dom, null, { renderer: 'svg' });
+
+        var option = {
+
+            // THEME AWARE CONFIGURATION
+            tooltip: {
+                trigger: 'axis',
+                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                borderColor: '#ddd',
+                borderWidth: 1,
+                textStyle: {
+                    color: '#333',
+                    fontSize: 14
+                },
+                padding: [10, 15],
+                extraCssText: 'box-shadow: 0 3px 10px rgba(0,0,0,0.15); border-radius: 6px;'
+            },
+
+            // DEFAULT TEXT STYLE
+            textStyle: {
+                fontFamily: 'Calibri, Arial, sans-serif',
+                fontSize: 12,
+                color: '#333'
+            },
+
+            // YOUR CHART CONFIGURATION
+            xAxis: {
+                type: 'category',
+                data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+            },
+            yAxis: {
+                type: 'value'
+            },
+            series: [{
+                data: [820, 932, 901, 934, 1290, 1330, 1320],
+                type: 'line'
+            }]
+        };
+
+        myChart.setOption(option);
+
+        // ✅ Responsive resize
+        window.addEventListener('resize', function() {
+            myChart.resize();
+        });
+
+        // THEME TOGGLE SUPPORT
+        window.setChartTheme = function(isDark) {
+            var themeOption = {
+                backgroundColor: isDark ? 'hsl(32 50% 4%)' : 'transparent',
+                textStyle: {
+                    color: isDark ? 'hsl(34 95% 93%)' : '#333'
+                },
+                tooltip: {
+                    backgroundColor: isDark ? 'rgba(20, 14, 5, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+                    borderColor: isDark ? 'hsl(34 20% 26%)' : '#ddd',
+                    textStyle: {
+                        color: isDark ? 'hsl(34 95% 93%)' : '#333'
+                    }
+                },
+                xAxis: {
+                    axisLine: { lineStyle: { color: isDark ? 'hsl(34 20% 26%)' : '#ddd' }},
+                    axisLabel: { color: isDark ? 'hsl(34 19% 68%)' : '#666'}
+                },
+                yAxis: {
+                    axisLine: { lineStyle: { color: isDark ? 'hsl(34 20% 26%)' : '#ddd' } },
+                    axisLabel: { color: isDark ? 'hsl(34 19% 68%)' : '#666'},
+                    splitLine: { lineStyle: { color: isDark ? 'hsl(35 31% 16%)' : '#eee' } }
+                }
+            };
+
+            myChart.setOption(themeOption);
+            console.log('Chart theme updated:', isDark ? 'dark' : 'light');
+        };
+    </script>
+</body>
+</html>
+
+
+

@@ -1,0 +1,53 @@
+Metadata-Version: 2.4
+Name: analytics_tasks_lite
+Version: 0.1.0
+Summary: Automation including file search and slide deck preparation.
+Author-email: AshutoshGaur <ashutoshgaur@live.com>
+Project-URL: homepage, https://ashugaur.github.io/analytics_tasks_lite/
+Project-URL: repository, https://github.com/ashugaur/analytics_tasks_lite.git
+Keywords: automation,analytics,search,file search,indexing,text mining,presentations,slides,vba,office automation,powerpoint automation,visualization,data processing
+Requires-Python: <3.13,>=3.11
+Description-Content-Type: text/markdown
+License-File: LICENSE.md
+Requires-Dist: art>=6.5
+Requires-Dist: pip>=25.2
+Requires-Dist: bs4>=0.0.2
+Requires-Dist: pandas>=3.0
+Requires-Dist: docx>=0.2.4
+Requires-Dist: pywin32>=310
+Requires-Dist: faker>=37.4.0
+Requires-Dist: pypdf2>=3.0.1
+Requires-Dist: psutil>=7.0.0
+Requires-Dist: numba>=0.61.0
+Requires-Dist: ebooklib>=0.19
+Requires-Dist: polars>=1.37.1
+Requires-Dist: coloraide>=8.6
+Requires-Dist: ipython>=9.10.0
+Requires-Dist: pyarrow>=20.0.0
+Requires-Dist: openpyxl>=3.1.5
+Requires-Dist: mammoth>=1.10.0
+Requires-Dist: nbformat>=5.10.4
+Requires-Dist: pyperclip>=1.9.0
+Requires-Dist: reportlab>=4.4.1
+Requires-Dist: importlib>=1.0.4
+Requires-Dist: nbclient>=0.10.2
+Requires-Dist: comtypes>=1.4.16
+Requires-Dist: nbconvert>=7.16.6
+Requires-Dist: spellchecker>=0.4
+Requires-Dist: markdownify>=1.2.0
+Requires-Dist: python-docx>=1.1.2
+Requires-Dist: python-pptx>=1.0.2
+Requires-Dist: matplotlib>=3.10.3
+Requires-Dist: matplotlib>=3.10.5
+Requires-Dist: scikit-learn>=1.7.0
+Requires-Dist: extract-msg>=0.54.1
+Requires-Dist: xlsxwriter>=3.2.9
+Requires-Dist: numpy<=2.1.3,>=2.1.0
+Requires-Dist: numpy<3.0.0,>=2.1.0
+Dynamic: license-file
+
+# analytics_tasks
+
+## About
+
+Automation that saves time doing file search and building presentations, [guide](https://ashugaur.github.io/analytics_tasks/), [PyPi](https://pypi.org/project/analytics_tasks/).
