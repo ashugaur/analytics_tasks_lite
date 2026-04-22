@@ -27,3 +27,8 @@ File search is a scan of major file types to give control over text corpus usage
 
 - `example\fs_build.py`: Demo to build a text corpus of major file types.
 - `example\fs_query.py`: Functions to explore the text corpus.
+
+
+## Latest updates
+
+Currently no major plans to make new changes due to busy schedule. The code here is relatively latest compared to the analytics_tasks [PyPi](https://pypi.org/project/analytics_tasks/) pacakge.
