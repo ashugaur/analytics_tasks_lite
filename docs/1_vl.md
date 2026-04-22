@@ -25,4 +25,4 @@ Includes tested codebase to prepare simple to advance visualizations.
 
 ### Demo
 
-Demo in `[src\analytics_tasks_lite\visual_library_demo.py](https://github.com/ashugaur/analytics_tasks_lite/blob/main/examples/slidejs.html)` (download and view).
+Demo in [`src\analytics_tasks_lite\visual_library_demo.py`](https://github.com/ashugaur/analytics_tasks_lite/blob/main/examples/slidejs.html) (download to view).
