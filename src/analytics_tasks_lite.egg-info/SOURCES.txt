@@ -1,3 +1,4 @@
+LICENSE
 LICENSE.md
 MANIFEST.in
 README.md
@@ -154,16 +155,6 @@ src/analytics_tasks_lite/visual_library_ao/__init__.py
 src/analytics_tasks_lite/visual_library_ao/build.py
 src/analytics_tasks_lite/visual_library_ao/visual_library_demo.py
 src/analytics_tasks_lite/visual_library_ao/visual_library_demo_old.py
-src/analytics_tasks_lite/visual_library_ao/visual_library_demo_v1.py
-src/analytics_tasks_lite/visual_library_ao/visual_library_demo_v10.py
-src/analytics_tasks_lite/visual_library_ao/visual_library_demo_v2.py
-src/analytics_tasks_lite/visual_library_ao/visual_library_demo_v3.py
-src/analytics_tasks_lite/visual_library_ao/visual_library_demo_v4.py
-src/analytics_tasks_lite/visual_library_ao/visual_library_demo_v5.py
-src/analytics_tasks_lite/visual_library_ao/visual_library_demo_v6.py
-src/analytics_tasks_lite/visual_library_ao/visual_library_demo_v7.py
-src/analytics_tasks_lite/visual_library_ao/visual_library_demo_v8.py
-src/analytics_tasks_lite/visual_library_ao/visual_library_demo_v9.py
 src/analytics_tasks_lite/visual_library_ao/gallery/____settings/colors.xlsm
 src/analytics_tasks_lite/visual_library_ao/gallery/change/line_xs_yp.bas
 src/analytics_tasks_lite/visual_library_ao/gallery/change/line_xs_yp.csv
