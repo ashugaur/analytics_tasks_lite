@@ -31,4 +31,4 @@ File search is a scan of major file types to give control over text corpus usage
 
 ## Latest updates
 
-Currently no major plans to make new changes due to busy schedule. The code here is relatively latest compared to the analytics_tasks [PyPi](https://pypi.org/project/analytics_tasks/) pacakge.
+Currently no major plans to make new changes due to busy schedule. The code here is relatively latest with fixes for effeciency compared to the analytics_tasks [PyPi](https://pypi.org/project/analytics_tasks/) pacakge.

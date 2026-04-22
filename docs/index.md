@@ -17,5 +17,5 @@ Lite version of [Analytics tasks](https://pypi.org/project/analytics_tasks/) (re
 
 `File search [fs]`: Create flexible document corpus.
 
-`slidejs`: End to end automation to create interactive presentations with advance visualizations blazingly fast.
+`slidejs`: End to end automation to create interactive presentations with advance visualizations at blazing speed.
 
