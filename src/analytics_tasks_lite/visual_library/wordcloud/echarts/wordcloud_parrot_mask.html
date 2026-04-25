@@ -1,0 +1,2044 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>ECharts Word Cloud</title>
+  <style>
+    * { box-sizing: border-box; margin:0; padding:0; }
+    body, html { background:transparent; overflow:hidden; }
+    #main { position:absolute; top:0; left:0; width:100vw; height:100vh; }
+  </style>
+  <script>
+    // Patch getContext BEFORE any library loads so every canvas on the page
+    // — including the ones created internally by echarts-wordcloud/layout.js —
+    // always has willReadFrequently:true. This eliminates the browser warning
+    // "Multiple readback operations using getImageData are faster with
+    // willReadFrequently" that originates from layout.js:1195.
+    (function () {
+      var _orig = HTMLCanvasElement.prototype.getContext;
+      HTMLCanvasElement.prototype.getContext = function (type, attrs) {
+        if (type === '2d') {
+          attrs = Object.assign({}, attrs, { willReadFrequently: true });
+        }
+        return _orig.call(this, type, attrs);
+      };
+    })();
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/echarts-wordcloud@2.1.0/dist/echarts-wordcloud.min.js"></script>
+</head>
+<body>
+  <div id="main"></div>
+  <script>
+    var chartDom, myChart;
+    function initChart() {
+      chartDom = document.getElementById('main');
+      myChart  = echarts.init(chartDom, null, {renderer:'canvas'});
+
+    var option = {
+  "backgroundColor": "transparent",
+  "tooltip": {
+    "show": true,
+    "padding": 10,
+    "textStyle": {
+      "fontSize": 12,
+      "color": "#fff"
+    },
+    "backgroundColor": "rgba(50, 50, 50, 0.95)",
+    "borderColor": "#666"
+  },
+  "series": [
+    {
+      "type": "wordCloud",
+      "shape": "circle",
+      "keepAspect": true,
+      "sizeRange": [
+        10,
+        56
+      ],
+      "rotationRange": [
+        -45,
+        45
+      ],
+      "rotationStep": 45,
+      "gridSize": 4,
+      "drawOutOfBound": false,
+      "layoutAnimation": true,
+      "textStyle": {
+        "fontFamily": "Arial",
+        "fontWeight": "bold"
+      },
+      "emphasis": {
+        "focus": "self",
+        "textStyle": {
+          "textShadowBlur": 8,
+          "textShadowColor": "rgba(0,0,0,0.5)"
+        }
+      },
+      "data": [
+        {
+          "name": "rainbow",
+          "value": 199.0,
+          "itemStyle": {
+            "color": "#4da6e8"
+          },
+          "_lc": "#1a6faf",
+          "_dc": "#4da6e8"
+        },
+        {
+          "name": "light",
+          "value": 78.0,
+          "itemStyle": {
+            "color": "#e87d74"
+          },
+          "_lc": "#c0392b",
+          "_dc": "#e87d74"
+        },
+        {
+          "name": "rainbows",
+          "value": 66.0,
+          "itemStyle": {
+            "color": "#48c9b0"
+          },
+          "_lc": "#16a085",
+          "_dc": "#48c9b0"
+        },
+        {
+          "name": "water",
+          "value": 44.0,
+          "itemStyle": {
+            "color": "#c39bd3"
+          },
+          "_lc": "#8e44ad",
+          "_dc": "#c39bd3"
+        },
+        {
+          "name": "colours",
+          "value": 41.0,
+          "itemStyle": {
+            "color": "#f0a27a"
+          },
+          "_lc": "#d35400",
+          "_dc": "#f0a27a"
+        },
+        {
+          "name": "sun",
+          "value": 32.0,
+          "itemStyle": {
+            "color": "#6fcf97"
+          },
+          "_lc": "#27ae60",
+          "_dc": "#6fcf97"
+        },
+        {
+          "name": "primary",
+          "value": 31.0,
+          "itemStyle": {
+            "color": "#7fb3d3"
+          },
+          "_lc": "#2980b9",
+          "_dc": "#7fb3d3"
+        },
+        {
+          "name": "angle",
+          "value": 29.0,
+          "itemStyle": {
+            "color": "#f7dc6f"
+          },
+          "_lc": "#f39c12",
+          "_dc": "#f7dc6f"
+        },
+        {
+          "name": "order",
+          "value": 26.0,
+          "itemStyle": {
+            "color": "#95a5a6"
+          },
+          "_lc": "#2c3e50",
+          "_dc": "#95a5a6"
+        },
+        {
+          "name": "different",
+          "value": 25.0,
+          "itemStyle": {
+            "color": "#ff6b6b"
+          },
+          "_lc": "#e74c3c",
+          "_dc": "#ff6b6b"
+        },
+        {
+          "name": "secondary",
+          "value": 25.0,
+          "itemStyle": {
+            "color": "#1dd3b0"
+          },
+          "_lc": "#1abc9c",
+          "_dc": "#1dd3b0"
+        },
+        {
+          "name": "droplets",
+          "value": 23.0,
+          "itemStyle": {
+            "color": "#c77dff"
+          },
+          "_lc": "#9b59b6",
+          "_dc": "#c77dff"
+        },
+        {
+          "name": "bow",
+          "value": 22.0,
+          "itemStyle": {
+            "color": "#4da6e8"
+          },
+          "_lc": "#1a6faf",
+          "_dc": "#4da6e8"
+        },
+        {
+          "name": "observer",
+          "value": 21.0,
+          "itemStyle": {
+            "color": "#e87d74"
+          },
+          "_lc": "#c0392b",
+          "_dc": "#e87d74"
+        },
+        {
+          "name": "arc",
+          "value": 20.0,
+          "itemStyle": {
+            "color": "#48c9b0"
+          },
+          "_lc": "#16a085",
+          "_dc": "#48c9b0"
+        },
+        {
+          "name": "reflected",
+          "value": 20.0,
+          "itemStyle": {
+            "color": "#c39bd3"
+          },
+          "_lc": "#8e44ad",
+          "_dc": "#c39bd3"
+        },
+        {
+          "name": "reflection",
+          "value": 19.0,
+          "itemStyle": {
+            "color": "#f0a27a"
+          },
+          "_lc": "#d35400",
+          "_dc": "#f0a27a"
+        },
+        {
+          "name": "red",
+          "value": 19.0,
+          "itemStyle": {
+            "color": "#6fcf97"
+          },
+          "_lc": "#27ae60",
+          "_dc": "#6fcf97"
+        },
+        {
+          "name": "seen",
+          "value": 19.0,
+          "itemStyle": {
+            "color": "#7fb3d3"
+          },
+          "_lc": "#2980b9",
+          "_dc": "#7fb3d3"
+        },
+        {
+          "name": "supernumerary",
+          "value": 19.0,
+          "itemStyle": {
+            "color": "#f7dc6f"
+          },
+          "_lc": "#f39c12",
+          "_dc": "#f7dc6f"
+        },
+        {
+          "name": "rays",
+          "value": 19.0,
+          "itemStyle": {
+            "color": "#95a5a6"
+          },
+          "_lc": "#2c3e50",
+          "_dc": "#95a5a6"
+        },
+        {
+          "name": "spectrum",
+          "value": 18.0,
+          "itemStyle": {
+            "color": "#ff6b6b"
+          },
+          "_lc": "#e74c3c",
+          "_dc": "#ff6b6b"
+        },
+        {
+          "name": "sky",
+          "value": 18.0,
+          "itemStyle": {
+            "color": "#1dd3b0"
+          },
+          "_lc": "#1abc9c",
+          "_dc": "#1dd3b0"
+        },
+        {
+          "name": "bands",
+          "value": 17.0,
+          "itemStyle": {
+            "color": "#c77dff"
+          },
+          "_lc": "#9b59b6",
+          "_dc": "#c77dff"
+        },
+        {
+          "name": "colour",
+          "value": 17.0,
+          "itemStyle": {
+            "color": "#4da6e8"
+          },
+          "_lc": "#1a6faf",
+          "_dc": "#4da6e8"
+        },
+        {
+          "name": "bows",
+          "value": 17.0,
+          "itemStyle": {
+            "color": "#e87d74"
+          },
+          "_lc": "#c0392b",
+          "_dc": "#e87d74"
+        },
+        {
+          "name": "inside",
+          "value": 16.0,
+          "itemStyle": {
+            "color": "#48c9b0"
+          },
+          "_lc": "#16a085",
+          "_dc": "#48c9b0"
+        },
+        {
+          "name": "explanation",
+          "value": 16.0,
+          "itemStyle": {
+            "color": "#c39bd3"
+          },
+          "_lc": "#8e44ad",
+          "_dc": "#c39bd3"
+        },
+        {
+          "name": "back",
+          "value": 15.0,
+          "itemStyle": {
+            "color": "#f0a27a"
+          },
+          "_lc": "#d35400",
+          "_dc": "#f0a27a"
+        },
+        {
+          "name": "one",
+          "value": 15.0,
+          "itemStyle": {
+            "color": "#6fcf97"
+          },
+          "_lc": "#27ae60",
+          "_dc": "#6fcf97"
+        },
+        {
+          "name": "first",
+          "value": 15.0,
+          "itemStyle": {
+            "color": "#7fb3d3"
+          },
+          "_lc": "#2980b9",
+          "_dc": "#7fb3d3"
+        },
+        {
+          "name": "blue",
+          "value": 15.0,
+          "itemStyle": {
+            "color": "#f7dc6f"
+          },
+          "_lc": "#f39c12",
+          "_dc": "#f7dc6f"
+        },
+        {
+          "name": "raindrop",
+          "value": 15.0,
+          "itemStyle": {
+            "color": "#95a5a6"
+          },
+          "_lc": "#2c3e50",
+          "_dc": "#95a5a6"
+        },
+        {
+          "name": "phenomenon",
+          "value": 14.0,
+          "itemStyle": {
+            "color": "#ff6b6b"
+          },
+          "_lc": "#e74c3c",
+          "_dc": "#ff6b6b"
+        },
+        {
+          "name": "above",
+          "value": 14.0,
+          "itemStyle": {
+            "color": "#1dd3b0"
+          },
+          "_lc": "#1abc9c",
+          "_dc": "#1dd3b0"
+        },
+        {
+          "name": "much",
+          "value": 14.0,
+          "itemStyle": {
+            "color": "#c77dff"
+          },
+          "_lc": "#9b59b6",
+          "_dc": "#c77dff"
+        },
+        {
+          "name": "two",
+          "value": 14.0,
+          "itemStyle": {
+            "color": "#4da6e8"
+          },
+          "_lc": "#1a6faf",
+          "_dc": "#4da6e8"
+        },
+        {
+          "name": "number",
+          "value": 13.0,
+          "itemStyle": {
+            "color": "#e87d74"
+          },
+          "_lc": "#c0392b",
+          "_dc": "#e87d74"
+        },
+        {
+          "name": "higher",
+          "value": 13.0,
+          "itemStyle": {
+            "color": "#48c9b0"
+          },
+          "_lc": "#16a085",
+          "_dc": "#48c9b0"
+        },
+        {
+          "name": "white",
+          "value": 13.0,
+          "itemStyle": {
+            "color": "#c39bd3"
+          },
+          "_lc": "#8e44ad",
+          "_dc": "#c39bd3"
+        },
+        {
+          "name": "because",
+          "value": 13.0,
+          "itemStyle": {
+            "color": "#f0a27a"
+          },
+          "_lc": "#d35400",
+          "_dc": "#f0a27a"
+        },
+        {
+          "name": "horizon",
+          "value": 13.0,
+          "itemStyle": {
+            "color": "#6fcf97"
+          },
+          "_lc": "#27ae60",
+          "_dc": "#6fcf97"
+        },
+        {
+          "name": "wiki",
+          "value": 12.0,
+          "itemStyle": {
+            "color": "#7fb3d3"
+          },
+          "_lc": "#2980b9",
+          "_dc": "#7fb3d3"
+        },
+        {
+          "name": "caused",
+          "value": 12.0,
+          "itemStyle": {
+            "color": "#f7dc6f"
+          },
+          "_lc": "#f39c12",
+          "_dc": "#f7dc6f"
+        },
+        {
+          "name": "only",
+          "value": 12.0,
+          "itemStyle": {
+            "color": "#95a5a6"
+          },
+          "_lc": "#2c3e50",
+          "_dc": "#95a5a6"
+        },
+        {
+          "name": "circle",
+          "value": 12.0,
+          "itemStyle": {
+            "color": "#ff6b6b"
+          },
+          "_lc": "#e74c3c",
+          "_dc": "#ff6b6b"
+        },
+        {
+          "name": "see",
+          "value": 12.0,
+          "itemStyle": {
+            "color": "#1dd3b0"
+          },
+          "_lc": "#1abc9c",
+          "_dc": "#1dd3b0"
+        },
+        {
+          "name": "visible",
+          "value": 12.0,
+          "itemStyle": {
+            "color": "#c77dff"
+          },
+          "_lc": "#9b59b6",
+          "_dc": "#c77dff"
+        },
+        {
+          "name": "between",
+          "value": 12.0,
+          "itemStyle": {
+            "color": "#4da6e8"
+          },
+          "_lc": "#1a6faf",
+          "_dc": "#4da6e8"
+        },
+        {
+          "name": "due",
+          "value": 12.0,
+          "itemStyle": {
+            "color": "#e87d74"
+          },
+          "_lc": "#c0392b",
+          "_dc": "#e87d74"
+        },
+        {
+          "name": "sunlight",
+          "value": 11.0,
+          "itemStyle": {
+            "color": "#48c9b0"
+          },
+          "_lc": "#16a085",
+          "_dc": "#48c9b0"
+        },
+        {
+          "name": "appear",
+          "value": 11.0,
+          "itemStyle": {
+            "color": "#c39bd3"
+          },
+          "_lc": "#8e44ad",
+          "_dc": "#c39bd3"
+        },
+        {
+          "name": "eye",
+          "value": 11.0,
+          "itemStyle": {
+            "color": "#f0a27a"
+          },
+          "_lc": "#d35400",
+          "_dc": "#f0a27a"
+        },
+        {
+          "name": "violet",
+          "value": 11.0,
+          "itemStyle": {
+            "color": "#6fcf97"
+          },
+          "_lc": "#27ae60",
+          "_dc": "#6fcf97"
+        },
+        {
+          "name": "each",
+          "value": 11.0,
+          "itemStyle": {
+            "color": "#7fb3d3"
+          },
+          "_lc": "#2980b9",
+          "_dc": "#7fb3d3"
+        },
+        {
+          "name": "all",
+          "value": 11.0,
+          "itemStyle": {
+            "color": "#f7dc6f"
+          },
+          "_lc": "#f39c12",
+          "_dc": "#f7dc6f"
+        },
+        {
+          "name": "raindrops",
+          "value": 11.0,
+          "itemStyle": {
+            "color": "#95a5a6"
+          },
+          "_lc": "#2c3e50",
+          "_dc": "#95a5a6"
+        },
+        {
+          "name": "through",
+          "value": 11.0,
+          "itemStyle": {
+            "color": "#ff6b6b"
+          },
+          "_lc": "#e74c3c",
+          "_dc": "#ff6b6b"
+        },
+        {
+          "name": "full",
+          "value": 10.0,
+          "itemStyle": {
+            "color": "#1dd3b0"
+          },
+          "_lc": "#1abc9c",
+          "_dc": "#1dd3b0"
+        },
+        {
+          "name": "however",
+          "value": 10.0,
+          "itemStyle": {
+            "color": "#c77dff"
+          },
+          "_lc": "#9b59b6",
+          "_dc": "#c77dff"
+        },
+        {
+          "name": "double",
+          "value": 10.0,
+          "itemStyle": {
+            "color": "#4da6e8"
+          },
+          "_lc": "#1a6faf",
+          "_dc": "#4da6e8"
+        },
+        {
+          "name": "glass",
+          "value": 10.0,
+          "itemStyle": {
+            "color": "#e87d74"
+          },
+          "_lc": "#c0392b",
+          "_dc": "#e87d74"
+        },
+        {
+          "name": "small",
+          "value": 10.0,
+          "itemStyle": {
+            "color": "#48c9b0"
+          },
+          "_lc": "#16a085",
+          "_dc": "#48c9b0"
+        },
+        {
+          "name": "surface",
+          "value": 10.0,
+          "itemStyle": {
+            "color": "#c39bd3"
+          },
+          "_lc": "#8e44ad",
+          "_dc": "#c39bd3"
+        },
+        {
+          "name": "drop",
+          "value": 10.0,
+          "itemStyle": {
+            "color": "#f0a27a"
+          },
+          "_lc": "#d35400",
+          "_dc": "#f0a27a"
+        },
+        {
+          "name": "refractive",
+          "value": 10.0,
+          "itemStyle": {
+            "color": "#6fcf97"
+          },
+          "_lc": "#27ae60",
+          "_dc": "#6fcf97"
+        },
+        {
+          "name": "index",
+          "value": 10.0,
+          "itemStyle": {
+            "color": "#7fb3d3"
+          },
+          "_lc": "#2980b9",
+          "_dc": "#7fb3d3"
+        },
+        {
+          "name": "refraction",
+          "value": 9.0,
+          "itemStyle": {
+            "color": "#f7dc6f"
+          },
+          "_lc": "#f39c12",
+          "_dc": "#f7dc6f"
+        },
+        {
+          "name": "circular",
+          "value": 9.0,
+          "itemStyle": {
+            "color": "#95a5a6"
+          },
+          "_lc": "#2c3e50",
+          "_dc": "#95a5a6"
+        },
+        {
+          "name": "refracted",
+          "value": 9.0,
+          "itemStyle": {
+            "color": "#ff6b6b"
+          },
+          "_lc": "#e74c3c",
+          "_dc": "#ff6b6b"
+        },
+        {
+          "name": "point",
+          "value": 9.0,
+          "itemStyle": {
+            "color": "#1dd3b0"
+          },
+          "_lc": "#1abc9c",
+          "_dc": "#1dd3b0"
+        },
+        {
+          "name": "over",
+          "value": 9.0,
+          "itemStyle": {
+            "color": "#c77dff"
+          },
+          "_lc": "#9b59b6",
+          "_dc": "#c77dff"
+        },
+        {
+          "name": "large",
+          "value": 9.0,
+          "itemStyle": {
+            "color": "#4da6e8"
+          },
+          "_lc": "#1a6faf",
+          "_dc": "#4da6e8"
+        },
+        {
+          "name": "used",
+          "value": 9.0,
+          "itemStyle": {
+            "color": "#e87d74"
+          },
+          "_lc": "#c0392b",
+          "_dc": "#e87d74"
+        },
+        {
+          "name": "since",
+          "value": 9.0,
+          "itemStyle": {
+            "color": "#48c9b0"
+          },
+          "_lc": "#16a085",
+          "_dc": "#48c9b0"
+        },
+        {
+          "name": "below",
+          "value": 9.0,
+          "itemStyle": {
+            "color": "#c39bd3"
+          },
+          "_lc": "#8e44ad",
+          "_dc": "#c39bd3"
+        },
+        {
+          "name": "droplet",
+          "value": 8.0,
+          "itemStyle": {
+            "color": "#f0a27a"
+          },
+          "_lc": "#d35400",
+          "_dc": "#f0a27a"
+        },
+        {
+          "name": "twinned",
+          "value": 8.0,
+          "itemStyle": {
+            "color": "#6fcf97"
+          },
+          "_lc": "#27ae60",
+          "_dc": "#6fcf97"
+        },
+        {
+          "name": "arcs",
+          "value": 8.0,
+          "itemStyle": {
+            "color": "#7fb3d3"
+          },
+          "_lc": "#2980b9",
+          "_dc": "#7fb3d3"
+        },
+        {
+          "name": "other",
+          "value": 8.0,
+          "itemStyle": {
+            "color": "#f7dc6f"
+          },
+          "_lc": "#f39c12",
+          "_dc": "#f7dc6f"
+        },
+        {
+          "name": "same",
+          "value": 8.0,
+          "itemStyle": {
+            "color": "#95a5a6"
+          },
+          "_lc": "#2c3e50",
+          "_dc": "#95a5a6"
+        },
+        {
+          "name": "spray",
+          "value": 8.0,
+          "itemStyle": {
+            "color": "#ff6b6b"
+          },
+          "_lc": "#e74c3c",
+          "_dc": "#ff6b6b"
+        },
+        {
+          "name": "less",
+          "value": 8.0,
+          "itemStyle": {
+            "color": "#1dd3b0"
+          },
+          "_lc": "#1abc9c",
+          "_dc": "#1dd3b0"
+        },
+        {
+          "name": "very",
+          "value": 8.0,
+          "itemStyle": {
+            "color": "#c77dff"
+          },
+          "_lc": "#9b59b6",
+          "_dc": "#c77dff"
+        },
+        {
+          "name": "called",
+          "value": 8.0,
+          "itemStyle": {
+            "color": "#4da6e8"
+          },
+          "_lc": "#1a6faf",
+          "_dc": "#4da6e8"
+        },
+        {
+          "name": "angles",
+          "value": 8.0,
+          "itemStyle": {
+            "color": "#e87d74"
+          },
+          "_lc": "#c0392b",
+          "_dc": "#e87d74"
+        },
+        {
+          "name": "rather",
+          "value": 8.0,
+          "itemStyle": {
+            "color": "#48c9b0"
+          },
+          "_lc": "#16a085",
+          "_dc": "#48c9b0"
+        },
+        {
+          "name": "theory",
+          "value": 8.0,
+          "itemStyle": {
+            "color": "#c39bd3"
+          },
+          "_lc": "#8e44ad",
+          "_dc": "#c39bd3"
+        },
+        {
+          "name": "reflections",
+          "value": 8.0,
+          "itemStyle": {
+            "color": "#f0a27a"
+          },
+          "_lc": "#d35400",
+          "_dc": "#f0a27a"
+        },
+        {
+          "name": "form",
+          "value": 7.0,
+          "itemStyle": {
+            "color": "#6fcf97"
+          },
+          "_lc": "#27ae60",
+          "_dc": "#6fcf97"
+        },
+        {
+          "name": "observer's",
+          "value": 7.0,
+          "itemStyle": {
+            "color": "#7fb3d3"
+          },
+          "_lc": "#2980b9",
+          "_dc": "#7fb3d3"
+        },
+        {
+          "name": "outside",
+          "value": 7.0,
+          "itemStyle": {
+            "color": "#f7dc6f"
+          },
+          "_lc": "#f39c12",
+          "_dc": "#f7dc6f"
+        },
+        {
+          "name": "circumhorizontal",
+          "value": 7.0,
+          "itemStyle": {
+            "color": "#95a5a6"
+          },
+          "_lc": "#2c3e50",
+          "_dc": "#95a5a6"
+        },
+        {
+          "name": "circumzenithal",
+          "value": 7.0,
+          "itemStyle": {
+            "color": "#ff6b6b"
+          },
+          "_lc": "#e74c3c",
+          "_dc": "#ff6b6b"
+        },
+        {
+          "name": "any",
+          "value": 7.0,
+          "itemStyle": {
+            "color": "#1dd3b0"
+          },
+          "_lc": "#1abc9c",
+          "_dc": "#1dd3b0"
+        },
+        {
+          "name": "human",
+          "value": 7.0,
+          "itemStyle": {
+            "color": "#c77dff"
+          },
+          "_lc": "#9b59b6",
+          "_dc": "#c77dff"
+        },
+        {
+          "name": "green",
+          "value": 7.0,
+          "itemStyle": {
+            "color": "#4da6e8"
+          },
+          "_lc": "#1a6faf",
+          "_dc": "#4da6e8"
+        },
+        {
+          "name": "rain",
+          "value": 7.0,
+          "itemStyle": {
+            "color": "#e87d74"
+          },
+          "_lc": "#c0392b",
+          "_dc": "#e87d74"
+        },
+        {
+          "name": "often",
+          "value": 7.0,
+          "itemStyle": {
+            "color": "#48c9b0"
+          },
+          "_lc": "#16a085",
+          "_dc": "#48c9b0"
+        },
+        {
+          "name": "possible",
+          "value": 7.0,
+          "itemStyle": {
+            "color": "#c39bd3"
+          },
+          "_lc": "#8e44ad",
+          "_dc": "#c39bd3"
+        },
+        {
+          "name": "smaller",
+          "value": 7.0,
+          "itemStyle": {
+            "color": "#f0a27a"
+          },
+          "_lc": "#d35400",
+          "_dc": "#f0a27a"
+        },
+        {
+          "name": "using",
+          "value": 7.0,
+          "itemStyle": {
+            "color": "#6fcf97"
+          },
+          "_lc": "#27ae60",
+          "_dc": "#6fcf97"
+        },
+        {
+          "name": "size",
+          "value": 7.0,
+          "itemStyle": {
+            "color": "#7fb3d3"
+          },
+          "_lc": "#2980b9",
+          "_dc": "#7fb3d3"
+        },
+        {
+          "name": "normal",
+          "value": 7.0,
+          "itemStyle": {
+            "color": "#f7dc6f"
+          },
+          "_lc": "#f39c12",
+          "_dc": "#f7dc6f"
+        },
+        {
+          "name": "both",
+          "value": 7.0,
+          "itemStyle": {
+            "color": "#95a5a6"
+          },
+          "_lc": "#2c3e50",
+          "_dc": "#95a5a6"
+        },
+        {
+          "name": "slightly",
+          "value": 7.0,
+          "itemStyle": {
+            "color": "#ff6b6b"
+          },
+          "_lc": "#e74c3c",
+          "_dc": "#ff6b6b"
+        },
+        {
+          "name": "moon",
+          "value": 7.0,
+          "itemStyle": {
+            "color": "#1dd3b0"
+          },
+          "_lc": "#1abc9c",
+          "_dc": "#1dd3b0"
+        },
+        {
+          "name": "produced",
+          "value": 7.0,
+          "itemStyle": {
+            "color": "#c77dff"
+          },
+          "_lc": "#9b59b6",
+          "_dc": "#c77dff"
+        },
+        {
+          "name": "cloud",
+          "value": 7.0,
+          "itemStyle": {
+            "color": "#4da6e8"
+          },
+          "_lc": "#1a6faf",
+          "_dc": "#4da6e8"
+        },
+        {
+          "name": "formed",
+          "value": 6.0,
+          "itemStyle": {
+            "color": "#e87d74"
+          },
+          "_lc": "#c0392b",
+          "_dc": "#e87d74"
+        },
+        {
+          "name": "side",
+          "value": 6.0,
+          "itemStyle": {
+            "color": "#48c9b0"
+          },
+          "_lc": "#16a085",
+          "_dc": "#48c9b0"
+        },
+        {
+          "name": "second",
+          "value": 6.0,
+          "itemStyle": {
+            "color": "#c39bd3"
+          },
+          "_lc": "#8e44ad",
+          "_dc": "#c39bd3"
+        },
+        {
+          "name": "before",
+          "value": 6.0,
+          "itemStyle": {
+            "color": "#f0a27a"
+          },
+          "_lc": "#d35400",
+          "_dc": "#f0a27a"
+        },
+        {
+          "name": "under",
+          "value": 6.0,
+          "itemStyle": {
+            "color": "#6fcf97"
+          },
+          "_lc": "#27ae60",
+          "_dc": "#6fcf97"
+        },
+        {
+          "name": "bottom",
+          "value": 6.0,
+          "itemStyle": {
+            "color": "#7fb3d3"
+          },
+          "_lc": "#2980b9",
+          "_dc": "#7fb3d3"
+        },
+        {
+          "name": "centre",
+          "value": 6.0,
+          "itemStyle": {
+            "color": "#f7dc6f"
+          },
+          "_lc": "#f39c12",
+          "_dc": "#f7dc6f"
+        },
+        {
+          "name": "optical",
+          "value": 6.0,
+          "itemStyle": {
+            "color": "#95a5a6"
+          },
+          "_lc": "#2c3e50",
+          "_dc": "#95a5a6"
+        },
+        {
+          "name": "source",
+          "value": 6.0,
+          "itemStyle": {
+            "color": "#ff6b6b"
+          },
+          "_lc": "#e74c3c",
+          "_dc": "#ff6b6b"
+        },
+        {
+          "name": "off",
+          "value": 6.0,
+          "itemStyle": {
+            "color": "#1dd3b0"
+          },
+          "_lc": "#1abc9c",
+          "_dc": "#1dd3b0"
+        },
+        {
+          "name": "perceived",
+          "value": 6.0,
+          "itemStyle": {
+            "color": "#c77dff"
+          },
+          "_lc": "#9b59b6",
+          "_dc": "#c77dff"
+        },
+        {
+          "name": "most",
+          "value": 6.0,
+          "itemStyle": {
+            "color": "#4da6e8"
+          },
+          "_lc": "#1a6faf",
+          "_dc": "#4da6e8"
+        },
+        {
+          "name": "indigo",
+          "value": 6.0,
+          "itemStyle": {
+            "color": "#e87d74"
+          },
+          "_lc": "#c0392b",
+          "_dc": "#e87d74"
+        },
+        {
+          "name": "observed",
+          "value": 6.0,
+          "itemStyle": {
+            "color": "#48c9b0"
+          },
+          "_lc": "#16a085",
+          "_dc": "#48c9b0"
+        },
+        {
+          "name": "drops",
+          "value": 6.0,
+          "itemStyle": {
+            "color": "#c39bd3"
+          },
+          "_lc": "#8e44ad",
+          "_dc": "#c39bd3"
+        },
+        {
+          "name": "air",
+          "value": 6.0,
+          "itemStyle": {
+            "color": "#f0a27a"
+          },
+          "_lc": "#d35400",
+          "_dc": "#f0a27a"
+        },
+        {
+          "name": "effect",
+          "value": 6.0,
+          "itemStyle": {
+            "color": "#6fcf97"
+          },
+          "_lc": "#27ae60",
+          "_dc": "#6fcf97"
+        },
+        {
+          "name": "glory",
+          "value": 6.0,
+          "itemStyle": {
+            "color": "#7fb3d3"
+          },
+          "_lc": "#2980b9",
+          "_dc": "#7fb3d3"
+        },
+        {
+          "name": "radius",
+          "value": 6.0,
+          "itemStyle": {
+            "color": "#f7dc6f"
+          },
+          "_lc": "#f39c12",
+          "_dc": "#f7dc6f"
+        },
+        {
+          "name": "wavelength",
+          "value": 6.0,
+          "itemStyle": {
+            "color": "#95a5a6"
+          },
+          "_lc": "#2c3e50",
+          "_dc": "#95a5a6"
+        },
+        {
+          "name": "main",
+          "value": 6.0,
+          "itemStyle": {
+            "color": "#ff6b6b"
+          },
+          "_lc": "#e74c3c",
+          "_dc": "#ff6b6b"
+        },
+        {
+          "name": "some",
+          "value": 6.0,
+          "itemStyle": {
+            "color": "#1dd3b0"
+          },
+          "_lc": "#1abc9c",
+          "_dc": "#1dd3b0"
+        },
+        {
+          "name": "band",
+          "value": 6.0,
+          "itemStyle": {
+            "color": "#c77dff"
+          },
+          "_lc": "#9b59b6",
+          "_dc": "#c77dff"
+        },
+        {
+          "name": "parallel",
+          "value": 6.0,
+          "itemStyle": {
+            "color": "#4da6e8"
+          },
+          "_lc": "#1a6faf",
+          "_dc": "#4da6e8"
+        },
+        {
+          "name": "optics",
+          "value": 6.0,
+          "itemStyle": {
+            "color": "#e87d74"
+          },
+          "_lc": "#c0392b",
+          "_dc": "#e87d74"
+        },
+        {
+          "name": "internal",
+          "value": 6.0,
+          "itemStyle": {
+            "color": "#48c9b0"
+          },
+          "_lc": "#16a085",
+          "_dc": "#48c9b0"
+        },
+        {
+          "name": "phenomena",
+          "value": 6.0,
+          "itemStyle": {
+            "color": "#c39bd3"
+          },
+          "_lc": "#8e44ad",
+          "_dc": "#c39bd3"
+        },
+        {
+          "name": "explained",
+          "value": 6.0,
+          "itemStyle": {
+            "color": "#f0a27a"
+          },
+          "_lc": "#d35400",
+          "_dc": "#f0a27a"
+        },
+        {
+          "name": "mirror",
+          "value": 6.0,
+          "itemStyle": {
+            "color": "#6fcf97"
+          },
+          "_lc": "#27ae60",
+          "_dc": "#6fcf97"
+        },
+        {
+          "name": "ibn",
+          "value": 6.0,
+          "itemStyle": {
+            "color": "#7fb3d3"
+          },
+          "_lc": "#2980b9",
+          "_dc": "#7fb3d3"
+        },
+        {
+          "name": "filled",
+          "value": 6.0,
+          "itemStyle": {
+            "color": "#f7dc6f"
+          },
+          "_lc": "#f39c12",
+          "_dc": "#f7dc6f"
+        },
+        {
+          "name": "part",
+          "value": 5.0,
+          "itemStyle": {
+            "color": "#95a5a6"
+          },
+          "_lc": "#2c3e50",
+          "_dc": "#95a5a6"
+        },
+        {
+          "name": "monochrome",
+          "value": 5.0,
+          "itemStyle": {
+            "color": "#ff6b6b"
+          },
+          "_lc": "#e74c3c",
+          "_dc": "#ff6b6b"
+        },
+        {
+          "name": "scientific",
+          "value": 5.0,
+          "itemStyle": {
+            "color": "#1dd3b0"
+          },
+          "_lc": "#1abc9c",
+          "_dc": "#1dd3b0"
+        },
+        {
+          "name": "experiments",
+          "value": 5.0,
+          "itemStyle": {
+            "color": "#c77dff"
+          },
+          "_lc": "#9b59b6",
+          "_dc": "#c77dff"
+        },
+        {
+          "name": "located",
+          "value": 5.0,
+          "itemStyle": {
+            "color": "#4da6e8"
+          },
+          "_lc": "#1a6faf",
+          "_dc": "#4da6e8"
+        },
+        {
+          "name": "even",
+          "value": 5.0,
+          "itemStyle": {
+            "color": "#e87d74"
+          },
+          "_lc": "#c0392b",
+          "_dc": "#e87d74"
+        },
+        {
+          "name": "many",
+          "value": 5.0,
+          "itemStyle": {
+            "color": "#48c9b0"
+          },
+          "_lc": "#16a085",
+          "_dc": "#48c9b0"
+        },
+        {
+          "name": "usually",
+          "value": 5.0,
+          "itemStyle": {
+            "color": "#c39bd3"
+          },
+          "_lc": "#8e44ad",
+          "_dc": "#c39bd3"
+        },
+        {
+          "name": "during",
+          "value": 5.0,
+          "itemStyle": {
+            "color": "#f0a27a"
+          },
+          "_lc": "#d35400",
+          "_dc": "#f0a27a"
+        },
+        {
+          "name": "half",
+          "value": 5.0,
+          "itemStyle": {
+            "color": "#6fcf97"
+          },
+          "_lc": "#27ae60",
+          "_dc": "#6fcf97"
+        },
+        {
+          "name": "sometimes",
+          "value": 5.0,
+          "itemStyle": {
+            "color": "#7fb3d3"
+          },
+          "_lc": "#2980b9",
+          "_dc": "#7fb3d3"
+        },
+        {
+          "name": "confused",
+          "value": 5.0,
+          "itemStyle": {
+            "color": "#f7dc6f"
+          },
+          "_lc": "#f39c12",
+          "_dc": "#f7dc6f"
+        },
+        {
+          "name": "sphere",
+          "value": 5.0,
+          "itemStyle": {
+            "color": "#95a5a6"
+          },
+          "_lc": "#2c3e50",
+          "_dc": "#95a5a6"
+        },
+        {
+          "name": "newton",
+          "value": 5.0,
+          "itemStyle": {
+            "color": "#ff6b6b"
+          },
+          "_lc": "#e74c3c",
+          "_dc": "#ff6b6b"
+        },
+        {
+          "name": "compared",
+          "value": 5.0,
+          "itemStyle": {
+            "color": "#1dd3b0"
+          },
+          "_lc": "#1abc9c",
+          "_dc": "#1dd3b0"
+        },
+        {
+          "name": "around",
+          "value": 5.0,
+          "itemStyle": {
+            "color": "#c77dff"
+          },
+          "_lc": "#9b59b6",
+          "_dc": "#c77dff"
+        },
+        {
+          "name": "right",
+          "value": 5.0,
+          "itemStyle": {
+            "color": "#4da6e8"
+          },
+          "_lc": "#1a6faf",
+          "_dc": "#4da6e8"
+        },
+        {
+          "name": "interference",
+          "value": 5.0,
+          "itemStyle": {
+            "color": "#e87d74"
+          },
+          "_lc": "#c0392b",
+          "_dc": "#e87d74"
+        },
+        {
+          "name": "sun's",
+          "value": 5.0,
+          "itemStyle": {
+            "color": "#48c9b0"
+          },
+          "_lc": "#16a085",
+          "_dc": "#48c9b0"
+        },
+        {
+          "name": "axis",
+          "value": 5.0,
+          "itemStyle": {
+            "color": "#c39bd3"
+          },
+          "_lc": "#8e44ad",
+          "_dc": "#c39bd3"
+        },
+        {
+          "name": "occur",
+          "value": 5.0,
+          "itemStyle": {
+            "color": "#f0a27a"
+          },
+          "_lc": "#d35400",
+          "_dc": "#f0a27a"
+        },
+        {
+          "name": "well",
+          "value": 5.0,
+          "itemStyle": {
+            "color": "#6fcf97"
+          },
+          "_lc": "#27ae60",
+          "_dc": "#6fcf97"
+        },
+        {
+          "name": "similar",
+          "value": 5.0,
+          "itemStyle": {
+            "color": "#7fb3d3"
+          },
+          "_lc": "#2980b9",
+          "_dc": "#7fb3d3"
+        },
+        {
+          "name": "common",
+          "value": 5.0,
+          "itemStyle": {
+            "color": "#f7dc6f"
+          },
+          "_lc": "#f39c12",
+          "_dc": "#f7dc6f"
+        },
+        {
+          "name": "book",
+          "value": 5.0,
+          "itemStyle": {
+            "color": "#95a5a6"
+          },
+          "_lc": "#2c3e50",
+          "_dc": "#95a5a6"
+        },
+        {
+          "name": "refractions",
+          "value": 5.0,
+          "itemStyle": {
+            "color": "#ff6b6b"
+          },
+          "_lc": "#e74c3c",
+          "_dc": "#ff6b6b"
+        },
+        {
+          "name": "experiment",
+          "value": 5.0,
+          "itemStyle": {
+            "color": "#1dd3b0"
+          },
+          "_lc": "#1abc9c",
+          "_dc": "#1dd3b0"
+        },
+        {
+          "name": "dispersion",
+          "value": 4.0,
+          "itemStyle": {
+            "color": "#c77dff"
+          },
+          "_lc": "#9b59b6",
+          "_dc": "#c77dff"
+        },
+        {
+          "name": "opposite",
+          "value": 4.0,
+          "itemStyle": {
+            "color": "#4da6e8"
+          },
+          "_lc": "#1a6faf",
+          "_dc": "#4da6e8"
+        },
+        {
+          "name": "ground",
+          "value": 4.0,
+          "itemStyle": {
+            "color": "#e87d74"
+          },
+          "_lc": "#c0392b",
+          "_dc": "#e87d74"
+        },
+        {
+          "name": "visibility",
+          "value": 4.0,
+          "itemStyle": {
+            "color": "#48c9b0"
+          },
+          "_lc": "#16a085",
+          "_dc": "#48c9b0"
+        },
+        {
+          "name": "derivation",
+          "value": 4.0,
+          "itemStyle": {
+            "color": "#c39bd3"
+          },
+          "_lc": "#8e44ad",
+          "_dc": "#c39bd3"
+        },
+        {
+          "name": "titan",
+          "value": 4.0,
+          "itemStyle": {
+            "color": "#f0a27a"
+          },
+          "_lc": "#d35400",
+          "_dc": "#f0a27a"
+        },
+        {
+          "name": "head",
+          "value": 4.0,
+          "itemStyle": {
+            "color": "#6fcf97"
+          },
+          "_lc": "#27ae60",
+          "_dc": "#6fcf97"
+        },
+        {
+          "name": "certain",
+          "value": 4.0,
+          "itemStyle": {
+            "color": "#7fb3d3"
+          },
+          "_lc": "#2980b9",
+          "_dc": "#7fb3d3"
+        },
+        {
+          "name": "cannot",
+          "value": 4.0,
+          "itemStyle": {
+            "color": "#f7dc6f"
+          },
+          "_lc": "#f39c12",
+          "_dc": "#f7dc6f"
+        },
+        {
+          "name": "direction",
+          "value": 4.0,
+          "itemStyle": {
+            "color": "#95a5a6"
+          },
+          "_lc": "#2c3e50",
+          "_dc": "#95a5a6"
+        },
+        {
+          "name": "photo",
+          "value": 4.0,
+          "itemStyle": {
+            "color": "#ff6b6b"
+          },
+          "_lc": "#e74c3c",
+          "_dc": "#ff6b6b"
+        },
+        {
+          "name": "maximum",
+          "value": 4.0,
+          "itemStyle": {
+            "color": "#1dd3b0"
+          },
+          "_lc": "#1abc9c",
+          "_dc": "#1dd3b0"
+        },
+        {
+          "name": "orange",
+          "value": 4.0,
+          "itemStyle": {
+            "color": "#c77dff"
+          },
+          "_lc": "#9b59b6",
+          "_dc": "#c77dff"
+        },
+        {
+          "name": "yellow",
+          "value": 4.0,
+          "itemStyle": {
+            "color": "#4da6e8"
+          },
+          "_lc": "#1a6faf",
+          "_dc": "#4da6e8"
+        },
+        {
+          "name": "mist",
+          "value": 4.0,
+          "itemStyle": {
+            "color": "#e87d74"
+          },
+          "_lc": "#c0392b",
+          "_dc": "#e87d74"
+        },
+        {
+          "name": "dark",
+          "value": 4.0,
+          "itemStyle": {
+            "color": "#48c9b0"
+          },
+          "_lc": "#16a085",
+          "_dc": "#48c9b0"
+        },
+        {
+          "name": "spot",
+          "value": 4.0,
+          "itemStyle": {
+            "color": "#c39bd3"
+          },
+          "_lc": "#8e44ad",
+          "_dc": "#c39bd3"
+        },
+        {
+          "name": "result",
+          "value": 4.0,
+          "itemStyle": {
+            "color": "#f0a27a"
+          },
+          "_lc": "#d35400",
+          "_dc": "#f0a27a"
+        },
+        {
+          "name": "larger",
+          "value": 4.0,
+          "itemStyle": {
+            "color": "#6fcf97"
+          },
+          "_lc": "#27ae60",
+          "_dc": "#6fcf97"
+        },
+        {
+          "name": "fainter",
+          "value": 4.0,
+          "itemStyle": {
+            "color": "#7fb3d3"
+          },
+          "_lc": "#2980b9",
+          "_dc": "#7fb3d3"
+        },
+        {
+          "name": "appears",
+          "value": 4.0,
+          "itemStyle": {
+            "color": "#f7dc6f"
+          },
+          "_lc": "#f39c12",
+          "_dc": "#f7dc6f"
+        },
+        {
+          "name": "addition",
+          "value": 4.0,
+          "itemStyle": {
+            "color": "#95a5a6"
+          },
+          "_lc": "#2c3e50",
+          "_dc": "#95a5a6"
+        },
+        {
+          "name": "created",
+          "value": 4.0,
+          "itemStyle": {
+            "color": "#ff6b6b"
+          },
+          "_lc": "#e74c3c",
+          "_dc": "#ff6b6b"
+        },
+        {
+          "name": "rarely",
+          "value": 4.0,
+          "itemStyle": {
+            "color": "#1dd3b0"
+          },
+          "_lc": "#1abc9c",
+          "_dc": "#1dd3b0"
+        },
+        {
+          "name": "several",
+          "value": 4.0,
+          "itemStyle": {
+            "color": "#c77dff"
+          },
+          "_lc": "#9b59b6",
+          "_dc": "#c77dff"
+        },
+        {
+          "name": "system",
+          "value": 4.0,
+          "itemStyle": {
+            "color": "#4da6e8"
+          },
+          "_lc": "#1a6faf",
+          "_dc": "#4da6e8"
+        },
+        {
+          "name": "known",
+          "value": 4.0,
+          "itemStyle": {
+            "color": "#e87d74"
+          },
+          "_lc": "#c0392b",
+          "_dc": "#e87d74"
+        },
+        {
+          "name": "according",
+          "value": 4.0,
+          "itemStyle": {
+            "color": "#48c9b0"
+          },
+          "_lc": "#16a085",
+          "_dc": "#48c9b0"
+        },
+        {
+          "name": "separate",
+          "value": 4.0,
+          "itemStyle": {
+            "color": "#c39bd3"
+          },
+          "_lc": "#8e44ad",
+          "_dc": "#c39bd3"
+        },
+        {
+          "name": "therefore",
+          "value": 4.0,
+          "itemStyle": {
+            "color": "#f0a27a"
+          },
+          "_lc": "#d35400",
+          "_dc": "#f0a27a"
+        },
+        {
+          "name": "after",
+          "value": 4.0,
+          "itemStyle": {
+            "color": "#6fcf97"
+          },
+          "_lc": "#27ae60",
+          "_dc": "#6fcf97"
+        },
+        {
+          "name": "formation",
+          "value": 4.0,
+          "itemStyle": {
+            "color": "#7fb3d3"
+          },
+          "_lc": "#2980b9",
+          "_dc": "#7fb3d3"
+        },
+        {
+          "name": "liquid",
+          "value": 4.0,
+          "itemStyle": {
+            "color": "#f7dc6f"
+          },
+          "_lc": "#f39c12",
+          "_dc": "#f7dc6f"
+        }
+      ],
+      "left": "center",
+      "top": "center",
+      "width": "700px",
+      "height": "563px"
+    }
+  ],
+  "title": {
+    "text": "Rainbow \u2014 Wikipedia",
+    "subtext": "Parrot silhouette \u00b7 image-colour words",
+    "left": "left",
+    "top": "top",
+    "textStyle": {
+      "fontSize": 14,
+      "fontWeight": "bold",
+      "fontFamily": "Arial",
+      "color": "#dcdcdc"
+    },
+    "subtextStyle": {
+      "fontSize": 12,
+      "fontWeight": "normal",
+      "fontFamily": "Arial",
+      "color": "#aaaaaa"
+    }
+  }
+};
+
+    // ── Tooltip formatter ───────────────────────────────────────────────
+    option.tooltip.formatter = function(p) {
+      var c = (p.data.itemStyle && p.data.itemStyle.color) ? p.data.itemStyle.color : '#999';
+      var dot = '<span style="display:inline-block;width:10px;height:10px;'
+              + 'border-radius:50%;background:'+c+';margin-right:6px;vertical-align:middle;"></span>';
+      return '<div style="line-height:1.6">' + dot + '<b>' + p.name + '</b>'
+           + '<br>Count: <b>' + p.value.toLocaleString() + '</b></div>';
+    };
+
+    // (setOption deferred until both images load)
+
+    
+        // ── Responsive sizing: scale series to fit container ──────────────────
+        function fitSeriesSize() {
+            var cw = chartDom.clientWidth  || 800;
+            var ch = chartDom.clientHeight || 600;
+            var aspectW = 700, aspectH = 563;
+            var scale   = Math.min(cw / aspectW, ch / aspectH) * 0.95;
+            var sw      = Math.round(aspectW * scale);
+            var sh      = Math.round(aspectH * scale);
+            option.series[0].width  = sw + 'px';
+            option.series[0].height = sh + 'px';
+        }
+
+        // ── Pre-extract all pixel data ONCE from the colour reference image ────
+        // willReadFrequently:true tells the browser to keep pixel data in CPU
+        // memory so getImageData() is fast. We call it only once here at load
+        // time — during rendering we do pure array lookups with zero canvas reads.
+        var colorCanvas = document.createElement('canvas');
+        colorCanvas.width  = 350;
+        colorCanvas.height = 281;
+        var colorCtx = colorCanvas.getContext('2d', { willReadFrequently: true });
+        var pixelData = null;   // flat Uint8ClampedArray: [R,G,B,A, R,G,B,A, ...]
+
+        // Pre-build a lookup table: word index → hex color string
+        // Computed once after pixel data is ready; zero cost during rendering.
+        var wordColorTable = [];
+
+        function buildColorTable(total) {
+            wordColorTable = [];
+            if (!pixelData) return;
+            for (var i = 0; i < total; i++) {
+                // Spread words across the image via an Archimedean spiral
+                // so early (large) words land near the centre of the parrot
+                // and later (small) words fan outward — matching wordcloud layout.
+                var t   = i / Math.max(total - 1, 1);
+                var ang = t * Math.PI * 8;          // 4 full turns
+                var r   = Math.sqrt(t) * 0.42;      // radius grows as √t
+                var nx  = Math.max(0.04, Math.min(0.96, 0.5 + r * Math.cos(ang)));
+                var ny  = Math.max(0.04, Math.min(0.96, 0.5 + r * Math.sin(ang)));
+                var px  = Math.round(nx * (350 - 1));
+                var py  = Math.round(ny * (281 - 1));
+                var off = (py * 350 + px) * 4;
+                var R = pixelData[off], G = pixelData[off+1], B = pixelData[off+2];
+                // If pixel is near-black (background), walk inward toward centre
+                var attempts = 0;
+                while (R + G + B < 30 && attempts < 8) {
+                    nx = 0.5 + (nx - 0.5) * 0.7;
+                    ny = 0.5 + (ny - 0.5) * 0.7;
+                    px  = Math.round(nx * (350 - 1));
+                    py  = Math.round(ny * (281 - 1));
+                    off = (py * 350 + px) * 4;
+                    R = pixelData[off]; G = pixelData[off+1]; B = pixelData[off+2];
+                    attempts++;
+                }
+                wordColorTable.push(
+                    '#' + ('0'+R.toString(16)).slice(-2)
+                        + ('0'+G.toString(16)).slice(-2)
+                        + ('0'+B.toString(16)).slice(-2)
+                );
+            }
+        }
+
+        // ── textStyle.color callback — pure array lookup, no canvas reads ──────
+        function sampleWordColor(params) {
+            var idx = params.dataIndex !== undefined ? params.dataIndex : 0;
+            return wordColorTable[idx] || '#cccccc';
+        }
+
+        // ── Load both images in parallel, render when both are ready ──────────
+        var maskImg   = new Image();
+        var colorImg  = new Image();
+        var readyCount = 0;
+
+        function onImageReady() {
+            readyCount++;
+            if (readyCount < 2) return;   // wait for both
+            // Extract all pixel data once — only getImageData call in the file
+            colorCtx.drawImage(colorImg, 0, 0, 350, 281);
+            pixelData = colorCtx.getImageData(0, 0, 350, 281).data;
+            buildColorTable(option.series[0].data.length);
+            fitSeriesSize();
+            option.series[0].maskImage  = maskImg;
+            option.series[0].textStyle.color = sampleWordColor;
+            myChart.setOption(option, true);
+            chartDom.setAttribute('data-chart-ready', 'true');
+        }
+
+        maskImg.onload  = onImageReady;
+        colorImg.onload = onImageReady;
+        maskImg.src     = 'data:image/png;base64,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';
+        colorImg.src    = 'data:image/jpeg;base64,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';
+
+    // ── Dual-theme support ──────────────────────────────────────────────
+    var _themeUI = {"light": {"tooltipBg": "rgba(255, 255, 255, 0.95)", "tooltipBorder": "#ccc", "tooltipText": "#333", "chartTitle": "#00165e", "chartSubtitle": "#666666"}, "dark": {"tooltipBg": "rgba(50, 50, 50, 0.95)", "tooltipBorder": "#666", "tooltipText": "#fff", "chartTitle": "#dcdcdc", "chartSubtitle": "#aaaaaa"}};
+    window.setChartTheme = function(isDark) {
+      var t = isDark ? _themeUI.dark : _themeUI.light;
+      option.series.forEach(function(s) {
+        s.data.forEach(function(pt) {
+          if (pt._lc && pt._dc) {
+            pt.itemStyle      = pt.itemStyle || {};
+            pt.itemStyle.color = isDark ? pt._dc : pt._lc;
+          }
+        });
+      });
+      myChart.setOption({
+        title:   { textStyle:{color:t.chartTitle}, subtextStyle:{color:t.chartSubtitle} },
+        tooltip: { backgroundColor:t.tooltipBg, borderColor:t.tooltipBorder,
+                    textStyle:{color:t.tooltipText} },
+        series: option.series
+      });
+    };
+
+    // (data-chart-ready set after images load)
+
+    window.addEventListener('resize', function() {
+      myChart.resize();
+            fitSeriesSize();
+            myChart.setOption({ series: option.series }, false);
+    });
+    } // end initChart
+
+    // Use rAF so the browser has painted #main and clientWidth/Height are real
+    requestAnimationFrame(function() {
+      requestAnimationFrame(initChart);
+    });
+  </script>
+</body>
+</html>
