@@ -1200,7 +1200,7 @@ def create_site(
         function initScrollSpy() {{
             const sections = document.querySelectorAll('.section-heading');
             const navLinks = document.querySelectorAll('.toc-link');
-            const navDots = document.querySelectorAll('.sidebar-nav-dot);
+            const navDots = document.querySelectorAll('.sidebar-nav-dot');
             
             if (sections.length === 0) return;
             
@@ -1482,7 +1482,7 @@ def create_site(
             display: block;
         }}
 
-        .sidebar.collapsible {{
+        .toc-sidebar.collapsible {{
             position: fixed;
             top: 10px;
             left: 44px;
@@ -1500,7 +1500,7 @@ def create_site(
             overflow-y: auto;
         }}
 
-        .sidebar.collapsible.open {{
+        .toc-sidebar.collapsible.open {{
             transform: scale(1);
             opacity: 1;
             pointer-events: auto;
@@ -2162,12 +2162,12 @@ def create_site(
         <span class="sidebar-contents-badge" onclick="toggleSidebar()">Index</span>
         <div class="sidebar-nav-dots" id="sidebar-nav-dots"></div>
     </div>
-""" if sidebar_collapsible else "") + f"""    <div class="sidebar{' collapsible' if sidebar_collapsible else ''}">
-        <div class="sidebar-header">
-            <div class="sidebar-title">{navigation_title}</div>""" + (f"""
-            <button class="sidebar-hamburger" onclick="closeSidebar()" title="Close navigation (S)" style="margin-left:auto;background:none;border:none;color:var(--text-color);cursor:pointer;padding:4px 6px;border-radius:4px;opacity:0.5;transition:opacity 0.15s;">
+""" if sidebar_collapsible else "") + f"""    <div class="toc-sidebar{' collapsible' if sidebar_collapsible else ''}">
+        <div class="toc-header">
+            <div class="toc-title">{navigation_title}</div>""" + (f"""
+            <button onclick="closeSidebar()" title="Close navigation (S)" style="margin-left:auto;background:none;border:none;color:var(--text-color);cursor:pointer;padding:4px 6px;border-radius:4px;opacity:0.5;transition:opacity 0.15s;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-            </button>""" if sidebar_collapsible else "") + """
+            </button>""" if sidebar_collapsible else "") + f"""
         </div>
         <div class="search-box">
             <div class="search-wrap">
@@ -2207,6 +2207,7 @@ def create_site(
                 <div class="help-row"><kbd>↑</kbd><kbd>↓</kbd> Navigate sidebar links</div>
                 <div class="help-row"><kbd>T</kbd> Toggle light / dark</div>
                 <div class="help-row"><kbd>Esc</kbd> Clear search / close</div>
+                <div class="help-row"><kbd>S</kbd> Toggle sidebar open/close</div>
                 <div class="help-row"><kbd>N</kbd> Focus navigation panel</div>
                 <div class="help-row"><kbd>M</kbd> Focus main content</div>
             </div>
@@ -2234,21 +2235,21 @@ def create_site(
         {collapse_js}
 
         function openSidebar() {{
-            var sb = document.querySelector('.sidebar.collapsible');
+            var sb = document.querySelector('.toc-sidebar.collapsible');
             var bd = document.getElementById('sidebar-backdrop');
             if (sb) sb.classList.add('open');
             if (bd) bd.classList.add('active');
         }}
 
         function closeSidebar() {{
-            var sb = document.querySelector('.sidebar.collapsible');
+            var sb = document.querySelector('.toc-sidebar.collapsible');
             var bd = document.getElementById('sidebar-backdrop');
             if (sb) sb.classList.remove('open');
             if (bd) bd.classList.remove('active');
         }}
 
         function toggleSidebar() {{
-            var sb = document.querySelector('.sidebar.collapsible');
+            var sb = document.querySelector('.toc-sidebar.collapsible');
             if (!sb) return;
             if (sb.classList.contains('open')) closeSidebar(); else openSidebar();
         }}
@@ -2257,11 +2258,9 @@ def create_site(
         (function() {{
             var dotsContainer = document.getElementById('sidebar-nav-dots');
             if (!dotsContainer) return;
-            var sections = document.querySelectorAll('.section[data-section-id]');
-            sections.forEach(function(sec) {{
-                var id = sec.getAttribute('data-section-id');
-                var title = sec.querySelector('.section-title');
-                var label = title ? (title.querySelector('.section-title-text') || title).textContent.trim() : id;
+            document.querySelectorAll('h1.section-heading, h2.section-heading').forEach(function(sec) {{
+                var id = sec.getAttribute('id');
+                var label = sec.textContent.trim();
                 var dot = document.createElement('div');
                 dot.className = 'sidebar-nav-dot';
                 dot.setAttribute('data-dot-section', id);
