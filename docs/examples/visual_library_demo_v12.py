@@ -66,6 +66,12 @@ def create_site(
     store_content: bool = False,
     sidebar_collapsible: bool = False,
     rename_headings: Dict[str, str] = None,
+    thumbnail_modern: List[str] = None,
+    thumbnail_modern_word_limit: int = 80,
+    thumbnail_modern_columns: str = "280px",
+    thumbnail_modern_aspect_ratio: str = None,
+    file_extension_visibility: List[str] = None,
+    show_keywords: bool = False,
 ):
     """
     Automatically generates an HTML gallery page by scanning a folder structure recursively.
@@ -427,6 +433,16 @@ def create_site(
     # Normalize hide_icons patterns (same syntax as compact_view / max_view)
     hide_icons_patterns = [pattern.lower() for pattern in hide_icons]
 
+    # Normalize thumbnail_modern patterns
+    if thumbnail_modern is None:
+        thumbnail_modern = []
+    thumbnail_modern_patterns = [pattern.lower() for pattern in thumbnail_modern]
+
+    # Normalize file extension visibility
+    _ext_visibility_set = None
+    if file_extension_visibility is not None:
+        _ext_visibility_set = {ext.lower() for ext in file_extension_visibility}
+
     # Normalize exclude patterns - store both exact folder names and path patterns
     exclude_patterns = []
     exclude_folder_names = set()
@@ -648,9 +664,11 @@ def create_site(
             f"{FOLDER_SVG_PATH}</svg>"
         )
 
-    def file_icon_link(file_info, item, file_colors, csv_previews):
+    def file_icon_link(file_info, item, file_colors, csv_previews, ext_visibility_set=None):
         """Return the <a> tag for a single associated file (SVG icon)."""
         ext = file_info["extension"]
+        if ext_visibility_set is not None and ext.lower() not in ext_visibility_set:
+            return ""
         class_name = file_colors.get(ext, ("file", ""))[0]
 
         if file_info["name"].startswith(item["basename"]):
@@ -852,6 +870,7 @@ def create_site(
         hide_icons_patterns: List[str],
         root_path: Path,
         compact_thumb_size: int,
+        thumbnail_modern_patterns: List[str],
         compact_column_ratio: List[int],
         card_image_height: Optional[int],
         file_colors: Dict,
@@ -895,6 +914,122 @@ def create_site(
                 folder_rel_path, root_path, hide_icons_patterns
             )
 
+            is_modern = matches_compact_pattern(
+                folder_rel_path, root_path, thumbnail_modern_patterns
+            )
+
+            if is_modern:
+                # —- Thumbnail Modern view ——————————————————————————————————————
+                _minmax = thumbnail_modern_columns
+                _aspect_style = f'aspect-ratio: {thumbnail_modern_aspect_ratio};' if thumbnail_modern_aspect_ratio else ''
+                html += f'<div class="gallery-container modern-gallery-container" style="grid-template-columns: repeat(auto-fill, minmax({_minmax}, 1fr));" data-section="{folder_id}">\n'
+
+                for item in items:
+                    image_info = item["image"]
+                    alt_text = sentence_case(item["basename"])
+                    folder_path = item["folder_path"]
+                    comments = item.get("comments")
+
+                    all_files = (
+                        [image_info["name"]]
+                        + [f["name"] for f in item["other_files"]]
+                        + ["folder"]
+                    )
+
+                    _kw = (comments or {}).get("keywords", "")
+                    _title_kw = (comments or {}).get("title", "")
+                    search_data = " ".join(
+                        all_files + [folder_rel_path] + [item["basename"]]
+                        + ([_kw] if _kw else []) + ([_title_kw] if _title_kw else [])
+                    ).lower()
+
+                    height_style = (
+                        f"height: {card_image_height}px;" if card_image_height else ""
+                    )
+                    _img_container_style = f"{height_style} {_aspect_style}".strip()
+
+                    # Title: use .comments title or sentence-case filename
+                    _cap_link = (comments or {}).get("link", "").strip()
+                    _cap_title = (comments or {}).get("title", "").strip()
+                    _cap_text = _cap_title if _cap_title else sentence_case(item["basename"])
+                    if _cap_link:
+                        title_html = f'<a href="{_cap_link}" target="_blank" class="comments-link modern-title-link">{_cap_text}</a>'
+                    else:
+                        title_html = _cap_text
+
+                    # Description from .comments body
+                    _desc_raw = (comments or {}).get("comments", "").strip()
+                    _desc_escaped = _desc_raw.replace("<", "&lt;").replace(">", "&gt;")
+                    # Full text for hover tooltip on truncated descriptions
+                    _tooltip_attr = f' title="{_desc_escaped}"' if _desc_escaped else ''
+                    
+                    # Word-based truncation
+                    _words = _desc_escaped.split()
+                    _is_truncated = len(_words) > thumbnail_modern_word_limit
+                    if _is_truncated:
+                        _desc_short = " ".join(_words[:thumbnail_modern_word_limit])
+                        desc_html = (
+                            f'<div class="modern-description"{_tooltip_attr}>'
+                            f'<span class="modern-desc-short">{_desc_short}'
+                            f'<span class="modern-desc-ellipsis" onclick="toggleModernDesc(this)"> ...</span></span>'
+                            f'<span class="modern-desc-full">{_desc_escaped}'
+                            f'<span class="modern-desc-collapse" onclick="toggleModernDesc(this)"> show less</span></span>'
+                            f'</div>'
+                        )
+                    elif _desc_escaped:
+                        desc_html = f'<div class="modern-description">{_desc_escaped}</div>'
+                    else:
+                        desc_html = ""
+
+                    # Keywords pills
+                    if show_keywords:
+                        _kw_raw = (comments or {}).get("keywords", "").strip()
+                        if _kw_raw:
+                            _kw_list = [k.strip() for k in re.split(r'[, \s]+', _kw_raw) if k.strip()]
+                            kw_html = '<div class="modern-keywords">' + ''.join(
+                                f'<span class="modern-keyword-pill">{k}</span>' for k in _kw_list
+                            ) + '</div>'
+                        else:
+                            kw_html = ""
+                    else:
+                        kw_html = ""
+
+                    html += f'''
+            <div class="gallery-item modern-gallery-item" data-search="{search_data}" data-section="{folder_id}">
+                <div class="image-container" style="{_img_container_style}" onclick="openModal('{image_info["path"]}', '{alt_text}')">
+                    <img src="{image_info["path"]}" alt="{alt_text}" style="width: 100%;">
+                </div>
+                <div class="modern-caption">
+                    <div class="modern-title">{title_html}</div>
+                    {desc_html}
+                    {kw_html}
+                </div>'''
+
+                    if not is_hide_icons:
+                        _show_explorer = _ext_visibility_set is None or ".explorer" in _ext_visibility_set
+                        _icon_parts = []
+                        if _show_explorer:
+                            _icon_parts.append(
+                                f'<a href="{folder_path}" class="file-link folder-link" target="_blank" title="Open folder">'
+                                f'{make_folder_svg(14)}</a>'
+                            )
+                        for file_info in item["other_files"]:
+                            _fl = file_icon_link(file_info, item, file_colors, csv_previews, _ext_visibility_set)
+                            if _fl:
+                                _icon_parts.append(_fl)
+                        
+                        if _icon_parts:
+                            html += '\n' + '        <div class="file-list">\n'
+                            html += '\n' + '            ' + '\n'.join(_icon_parts)
+                            html += '\n' + '        </div>'
+
+                    html += """
+            </div>"""
+
+                html += "</div>\n"
+
+                html += f'<div class="compact-list" data-section="{folder_id}">\n'
+
             if is_compact:
                 html += f'<div class="compact-list" data-section="{folder_id}">\n'
 
@@ -929,18 +1064,22 @@ def create_site(
                      onclick="openModal('{image_info["path"]}', '{alt_text}')">'''
 
                     if not is_hide_icons:
-                        html += f'''
-                <div class="compact-icons">
-                    <a href="{folder_path}" class="file-link folder-link" target="_blank" title="Open folder">
-                        {make_folder_svg(16)}
-                    </a>'''
-
-                        for file_info in item["other_files"]:
-                            html += file_icon_link(
-                                file_info, item, file_colors, csv_previews
+                        _show_explorer_c = _ext_visibility_set is None or ".explorer" in _ext_visibility_set
+                        _icon_parts_c = []
+                        if _show_explorer_c:
+                            _icon_parts_c.append(
+                                f'<a href="{folder_path}" class="file-link folder-link" target="_blank" title="Open folder">'
+                                f'{make_folder_svg(16)}</a>'
                             )
 
-                        html += "\n                </div>"
+                        for file_info in item["other_files"]:
+                            _fl_c = file_icon_link(file_info, item, file_colors, csv_previews, _ext_visibility_set)
+                            if _fl_c:
+                                _icon_parts_c.append(_fl_c)
+                        if _icon_parts_c:
+                            html += '\n                 <div class="compact-icons">\n                   '
+                            html += '\n                     '.join(_icon_parts_c)
+                            html += "\n                </div>"
 
                     if has_comments:
                         # Build title — wrap in link if comments has a link:
@@ -1017,16 +1156,22 @@ def create_site(
                 </div>'''
 
                     if not is_hide_icons:
-                        html += f'''
-                <div class="file-list">
-                    <a href="{folder_path}" class="file-link folder-link" target="_blank" title="Open folder">
-                        {make_folder_svg(14)}
-                    </a>'''
+                        _show_explorer_n = _ext_visibility_set is None or ".explorer" in _ext_visibility_set
+                        _icon_parts_n = []
+                        if _show_explorer_n:
+                            _icon_parts_n.append(
+                                f'<a href="{folder_path}" class="file-link folder-link" target="_blank" title="Open folder">'
+                                f'{make_folder_svg(14)}</a>'
+                            )
 
                         for file_info in item["other_files"]:
-                            html += file_icon_link(
-                                file_info, item, file_colors, csv_previews
-                            )
+                            _fl_n = file_icon_link(file_info, items, file_colors, csv_previews, _ext_visibility_set)
+                            if _fl_n:
+                                _icon_parts_n.append(_fl_n)
+                        if _icon_parts_n:
+                            html += '\n                 <div class="file-list">\n                   '
+                            html += '\n                     '.join(_icon_parts_n)
+                            html += '\n                 </div>'
 
                         html += """
                 </div>"""
@@ -1053,6 +1198,7 @@ def create_site(
                 compact_patterns,
                 max_view_patterns,
                 hide_icons_patterns,
+                thumbnail_modern_patterns,
                 root_path,
                 compact_thumb_size,
                 compact_column_ratio,
@@ -1069,6 +1215,7 @@ def create_site(
         compact_patterns: List[str],
         max_view_patterns: List[str],
         hide_icons_patterns: List[str],
+        thumbnail_modern_patterns: List[str],
     ) -> str:
         """Generate complete HTML with hierarchical structure."""
 
@@ -1082,6 +1229,7 @@ def create_site(
             compact_patterns,
             max_view_patterns,
             hide_icons_patterns,
+            thumbnail_modern_patterns,
             root_path,
             compact_thumb_size,
             compact_column_ratio,
@@ -1919,6 +2067,116 @@ def create_site(
             flex-shrink: 0;
         }}
 
+        .modern-gallery-container {{
+            gap: 24px;
+        }}
+
+        .modern-gallery-item .image-container {{
+            overflow: hidden;
+        }}
+
+        .modern-gallery-item .image-container img {{
+            transition: transform 0.35s ease;
+        }}
+
+        .modern-gallery-item:hover .image-container img {{
+            transform: scale(1.04);
+        }}
+
+        .modern-gallery-item .modern-caption {{
+            padding: 12px;
+            background-color: var(--sidebar-bg);
+            text-align: left;
+            border-top: 1px solid var(--border-color);
+        }}
+
+        .modern-title {{
+            font-weight: 600;
+            font-size: __COMMENT_TITLE_SIZE__;
+            color: var(--accent-color);
+            margin-bottom: 6px;
+            line-height: 1.4;
+        }}
+
+        .modern-title a {{
+            color: var(--accent-color);
+            text-decoration: none;
+        }}
+
+        .modern-title a:hover {{
+            text-decoration: underline;
+        }}
+
+        .modern-description {{
+            font-size: calc(__COMMENT_BODY_SIZE__ - 1px);
+            color: var(--text-color);
+            opacity: 0.82;
+            line-height: 1.55;
+            white-space: pre-line;
+            max-height: 500px;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+        }}
+
+        .modern-desc-short {{
+            display: -webkit-box;
+            -webkit-line-clamp: 8;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }}
+
+        .modern-description .modern-desc-full {{
+            display: none;
+        }}
+
+        .modern-description.expanded {{
+            max-height: 4000px;
+        }}
+
+        .modern-description.expanded .modern-desc-short {{
+            display: none;
+        }}
+
+        .modern-description.expanded .modern-desc-full {{
+            display: inline;
+        }}
+
+        .modern-desc-ellipsis,
+        .modern-desc-collapse {{
+            cursor: pointer;
+            color: var(--accent-color);
+            font-weight: 500;
+            font-size: calc(__COMMENT_BODY_SIZE__ - 2px);
+        }}
+
+        .modern-desc-ellipsis:hover,
+        .modern-desc-collapse:hover {{
+            text-decoration: underline;
+        }}
+
+        .modern-keywords {{
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 8px;
+        }}
+
+        .modern-keyword-pill {{
+            display: inline-block;
+            padding: 2px 8px;
+            font-size: calc(__COMMENT_BODY_SIZE__ - 3px);
+            border-radius: 12px;
+            background-color: var(--hover-color);
+            color: var(--text-color);
+            opacity: 0.75;
+            border: 1px solid var(--border-color);
+            line-height: 1.5;
+        }}
+
+        .modern-gallery-item .image-caption {{
+            display: none;
+        }}
+
         .csv-preview {{
             display: none;
             position: absolute;
@@ -2398,6 +2656,11 @@ def create_site(
             filterGallery();
         }}
 
+        function toggleModernDesc(el) {{
+            const desc = el.closest('.modern-description');
+            if (desc) desc.classList.toggle('expanded');
+        }}
+
         function toggleHelp() {{
             document.getElementById('helpTooltip').classList.toggle('visible');
         }}
@@ -2416,7 +2679,7 @@ def create_site(
             const clearBtn    = document.getElementById('search-clear');
             const allItems    = document.querySelectorAll('.gallery-item, .compact-row');
             const allSections = document.querySelectorAll(
-                '.section-heading, .section-description, .gallery-container, .compact-list'
+                '.section-heading, .section-description, .gallery-container, .modern-gallery-container, .compact-list'
             );
             const searchCount = document.getElementById('search-count');
 
@@ -2568,7 +2831,7 @@ def create_site(
 
         print("🌿 Generating HTML...")
         html_content = generate_html(
-            gallery_data, csv_previews, root_path, compact_patterns, max_view_patterns, hide_icons_patterns
+            gallery_data, csv_previews, root_path, compact_patterns, max_view_patterns, hide_icons_patterns, thumbnail_modern_patterns
         )
 
         if output_file:
