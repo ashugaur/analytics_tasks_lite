@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Circle Packing — Market Universe</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        /* ── Reset & base ──────────────────────────────────────────────── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg:          #0f1117;
+            --surface:     #181b24;
+            --surface2:    #1f2330;
+            --border:      rgba(255,255,255,0.07);
+            --text-primary:#e8eaf0;
+            --text-muted:  #7a7f96;
+            --text-dim:    #454a62;
+            --accent:      #4f7cff;
+            --font-sans:   'DM Sans', sans-serif;
+            --font-mono:   'DM Mono', monospace;
+            --radius:      10px;
+            --transition:  0.22s cubic-bezier(0.4,0,0.2,1);
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            font-size: 14px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── Header ────────────────────────────────────────────────────── */
+        header {
+            padding: 18px 28px 0;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .header-left { display: flex; flex-direction: column; gap: 4px; }
+
+        h1 {
+            font-size: 17px;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
+        }
+
+        .subtitle {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        /* ── Breadcrumb ─────────────────────────────────────────────────── */
+        #breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 28px 0;
+            font-size: 12px;
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+            min-height: 32px;
+            flex-wrap: wrap;
+        }
+
+        .bc-item {
+            cursor: pointer;
+            color: var(--accent);
+            transition: opacity var(--transition);
+        }
+        .bc-item:hover { opacity: 0.7; }
+        .bc-sep { color: var(--text-dim); }
+        .bc-current { color: var(--text-muted); cursor: default; }
+
+        /* ── Main layout ────────────────────────────────────────────────── */
+        .chart-wrap {
+            flex: 1;
+            display: flex;
+            gap: 0;
+            padding: 12px 28px 16px;
+            min-height: 0;
+        }
+
+        #chart-container {
+            flex: 1;
+            position: relative;
+            min-height: 520px;
+        }
+
+        #chart-container svg {
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        /* ── Sidebar legend ─────────────────────────────────────────────── */
+        #legend {
+            width: 200px;
+            flex-shrink: 0;
+            padding-left: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            overflow-y: auto;
+            max-height: 600px;
+        }
+
+        .legend-title {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            margin-bottom: 4px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 3px 6px;
+            border-radius: 5px;
+            transition: background var(--transition);
+        }
+        .legend-item:hover { background: var(--surface2); color: var(--text-primary); }
+
+        .legend-swatch {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        /* ── Tooltip ────────────────────────────────────────────────────── */
+        #tooltip {
+            position: fixed;
+            background: rgba(15,17,23,0.97);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: var(--radius);
+            padding: 12px 16px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.15s ease;
+            z-index: 9999;
+            max-width: 280px;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+        }
+
+        #tooltip.visible { opacity: 1; }
+
+        .tt-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .tt-path {
+            font-size: 10px;
+            color: var(--text-dim);
+            font-family: var(--font-mono);
+            margin-bottom: 10px;
+        }
+
+        .tt-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 16px;
+            padding: 3px 0;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .tt-label {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .tt-value {
+            font-size: 12px;
+            font-weight: 500;
+            font-family: var(--font-mono);
+            color: var(--text-primary);
+        }
+
+        .tt-hint {
+            margin-top: 9px;
+            font-size: 10px;
+            color: var(--text-dim);
+            font-style: italic;
+        }
+
+        /* ── Stats bar ──────────────────────────────────────────────────── */
+        #stats-bar {
+            display: flex;
+            gap: 24px;
+            padding: 0 28px 14px;
+            flex-wrap: wrap;
+        }
+
+        .stat-pill {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-dim);
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 300;
+            font-family: var(--font-mono);
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+        }
+
+        /* ── D3 circle styles ───────────────────────────────────────────── */
+        .node circle {
+            stroke-width: 1.5px;
+            transition: opacity var(--transition), filter var(--transition);
+        }
+
+        .node circle.leaf {
+            cursor: pointer;
+        }
+
+        .node circle.leaf:hover {
+            filter: brightness(1.25);
+        }
+
+        .node circle.branch {
+            cursor: zoom-in;
+            fill-opacity: 0.06;
+        }
+
+        .node circle.branch:hover {
+            fill-opacity: 0.12;
+        }
+
+        .node text {
+            pointer-events: none;
+            font-family: var(--font-sans);
+            dominant-baseline: middle;
+            text-anchor: middle;
+        }
+
+        .node text.label-branch {
+            fill: rgba(255,255,255,0.55);
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        .node text.label-leaf {
+            fill: rgba(255,255,255,0.85);
+            font-weight: 400;
+        }
+
+        .zoom-out-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            font-family: var(--font-sans);
+            font-size: 12px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: none;
+            transition: background var(--transition), color var(--transition);
+        }
+        .zoom-out-btn:hover { background: var(--surface); color: var(--text-primary); }
+        .zoom-out-btn.visible { display: flex; align-items: center; gap: 6px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-left">
+        <h1 id="chart-title">Market Universe</h1>
+        <div class="subtitle" id="chart-subtitle">Click any circle to zoom in · Click background to zoom out</div>
+    </div>
+</header>
+
+<div id="breadcrumb">
+    <span class="bc-item" data-depth="-1">Root</span>
+</div>
+
+<div id="stats-bar"></div>
+
+<div class="chart-wrap">
+    <div id="chart-container">
+        <button class="zoom-out-btn" id="zoom-out-btn">↑ Zoom out</button>
+    </div>
+    <div id="legend">
+        <div class="legend-title">Categories</div>
+    </div>
+</div>
+
+<div id="tooltip"></div>
+
+<script>
+// ============================================================
+//  ⚠️  DATA INJECTION POINT — replaced by circle_packing_d3.py
+// ============================================================
+// __CHART_CONFIG_START__
+const CHART_CONFIG = {
+    "title": "Patient Universe \u2014 Diagnosis \u00d7 Drug",
+    "subtitle": "Click any circle to zoom in \u00b7 Click background to zoom out",
+    "size_metric": "patient_count",
+    "kpi_cols": [
+        "patient_count",
+        "avg_age",
+        "avg_treatment_months",
+        "pct_female"
+    ],
+    "kpi_labels": {
+        "patient_count": "Patients",
+        "avg_age": "Avg Age",
+        "avg_treatment_months": "Avg Treatment (mo)",
+        "pct_female": "% Female"
+    },
+    "kpi_format": {
+        "patient_count": "integer",
+        "avg_age": "decimal1",
+        "avg_treatment_months": "decimal1",
+        "pct_female": "pct"
+    }
+};
+// __CHART_CONFIG_END__
+
+// __COLOR_MAP_START__
+const COLOR_MAP = {
+    "Type 2 Diabetes": {
+        "light": "#4f9cf6",
+        "dark": "#2c6fc9",
+        "display": "T2 Diabetes",
+        "order": 1
+    },
+    "Hypertension": {
+        "light": "#f97b5a",
+        "dark": "#c74e32",
+        "display": "Hypertension",
+        "order": 2
+    },
+    "Heart Failure": {
+        "light": "#a78bfa",
+        "dark": "#7c5cc4",
+        "display": "Heart Failure",
+        "order": 3
+    },
+    "COPD": {
+        "light": "#34d399",
+        "dark": "#1a9c6e",
+        "display": "COPD",
+        "order": 4
+    },
+    "Depression": {
+        "light": "#fbbf24",
+        "dark": "#c48e0a",
+        "display": "Depression",
+        "order": 5
+    },
+    "Atrial Fibrillation": {
+        "light": "#f472b6",
+        "dark": "#be4a8a",
+        "display": "AFib",
+        "order": 6
+    },
+    "GLP-1 Agonist": {
+        "light": "#60adf8",
+        "dark": "#3a83d4",
+        "display": "GLP-1",
+        "order": 1
+    },
+    "SGLT2 Inhibitor": {
+        "light": "#4ade92",
+        "dark": "#22a865",
+        "display": "SGLT2i",
+        "order": 2
+    },
+    "ACE Inhibitor": {
+        "light": "#fb8e70",
+        "dark": "#d4613e",
+        "display": "ACEi",
+        "order": 3
+    },
+    "Beta Blocker": {
+        "light": "#b99cfb",
+        "dark": "#9070d6",
+        "display": "Beta Blocker",
+        "order": 4
+    },
+    "SSRI": {
+        "light": "#fccf55",
+        "dark": "#d49e1e",
+        "display": "SSRI",
+        "order": 5
+    },
+    "Anticoagulant": {
+        "light": "#f687c5",
+        "dark": "#c95d9a",
+        "display": "Anticoagulant",
+        "order": 6
+    },
+    "Ozempic": {
+        "light": "#93c5fd",
+        "dark": "#4f9cf6",
+        "display": "Ozempic",
+        "order": 1
+    },
+    "Mounjaro": {
+        "light": "#6ee7f7",
+        "dark": "#2bb8cf",
+        "display": "Mounjaro",
+        "order": 2
+    },
+    "Jardiance": {
+        "light": "#6efbbf",
+        "dark": "#1fa86e",
+        "display": "Jardiance",
+        "order": 3
+    },
+    "Forxiga": {
+        "light": "#86efac",
+        "dark": "#22a865",
+        "display": "Forxiga",
+        "order": 4
+    },
+    "Lisinopril": {
+        "light": "#fca98a",
+        "dark": "#d4613e",
+        "display": "Lisinopril",
+        "order": 5
+    },
+    "Metoprolol": {
+        "light": "#c4b5fd",
+        "dark": "#9070d6",
+        "display": "Metoprolol",
+        "order": 6
+    },
+    "Sertraline": {
+        "light": "#fde68a",
+        "dark": "#d49e1e",
+        "display": "Sertraline",
+        "order": 7
+    },
+    "Apixaban": {
+        "light": "#fbcfe8",
+        "dark": "#c95d9a",
+        "display": "Apixaban",
+        "order": 8
+    }
+};
+// __COLOR_MAP_END__
+
+// __HIERARCHY_DATA_START__
+const HIERARCHY_DATA = {
+    "name": "All Patients",
+    "kpis": {
+        "patient_count": 124850,
+        "avg_age": 60.71,
+        "avg_treatment_months": 23.23,
+        "pct_female": 49.47
+    },
+    "children": [
+        {
+            "name": "Type 2 Diabetes",
+            "kpis": {
+                "patient_count": 38420,
+                "avg_age": 61.36,
+                "avg_treatment_months": 18.78,
+                "pct_female": 47.69
+            },
+            "children": [
+                {
+                    "name": "GLP-1 Agonist",
+                    "kpis": {
+                        "patient_count": 14200,
+                        "avg_age": 60.08,
+                        "avg_treatment_months": 20.22,
+                        "pct_female": 46.18
+                    },
+                    "children": [
+                        {
+                            "name": "Ozempic",
+                            "kpis": {
+                                "patient_count": 8500,
+                                "avg_age": 59.8,
+                                "avg_treatment_months": 21.3,
+                                "pct_female": 45.5
+                            }
+                        },
+                        {
+                            "name": "Mounjaro",
+                            "kpis": {
+                                "patient_count": 5700,
+                                "avg_age": 60.5,
+                                "avg_treatment_months": 18.6,
+                                "pct_female": 47.2
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "SGLT2 Inhibitor",
+                    "kpis": {
+                        "patient_count": 12800,
+                        "avg_age": 62.39,
+                        "avg_treatment_months": 16.8,
+                        "pct_female": 49.09
+                    },
+                    "children": [
+                        {
+                            "name": "Jardiance",
+                            "kpis": {
+                                "patient_count": 8200,
+                                "avg_age": 62.1,
+                                "avg_treatment_months": 17.2,
+                                "pct_female": 48.8
+                            }
+                        },
+                        {
+                            "name": "Forxiga",
+                            "kpis": {
+                                "patient_count": 4600,
+                                "avg_age": 62.9,
+                                "avg_treatment_months": 16.1,
+                                "pct_female": 49.6
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Beta Blocker",
+                    "kpis": {
+                        "patient_count": 11420,
+                        "avg_age": 61.8,
+                        "avg_treatment_months": 19.2,
+                        "pct_female": 48.0
+                    },
+                    "children": [
+                        {
+                            "name": "Metoprolol",
+                            "kpis": {
+                                "patient_count": 11420,
+                                "avg_age": 61.8,
+                                "avg_treatment_months": 19.2,
+                                "pct_female": 48.0
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Hypertension",
+            "kpis": {
+                "patient_count": 31650,
+                "avg_age": 57.61,
+                "avg_treatment_months": 22.37,
+                "pct_female": 52.36
+            },
+            "children": [
+                {
+                    "name": "ACE Inhibitor",
+                    "kpis": {
+                        "patient_count": 17200,
+                        "avg_age": 57.2,
+                        "avg_treatment_months": 24.1,
+                        "pct_female": 51.4
+                    },
+                    "children": [
+                        {
+                            "name": "Lisinopril",
+                            "kpis": {
+                                "patient_count": 17200,
+                                "avg_age": 57.2,
+                                "avg_treatment_months": 24.1,
+                                "pct_female": 51.4
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Beta Blocker",
+                    "kpis": {
+                        "patient_count": 14450,
+                        "avg_age": 58.1,
+                        "avg_treatment_months": 20.3,
+                        "pct_female": 53.5
+                    },
+                    "children": [
+                        {
+                            "name": "Metoprolol",
+                            "kpis": {
+                                "patient_count": 14450,
+                                "avg_age": 58.1,
+                                "avg_treatment_months": 20.3,
+                                "pct_female": 53.5
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Heart Failure",
+            "kpis": {
+                "patient_count": 22180,
+                "avg_age": 67.4,
+                "avg_treatment_months": 28.64,
+                "pct_female": 44.14
+            },
+            "children": [
+                {
+                    "name": "Beta Blocker",
+                    "kpis": {
+                        "patient_count": 12300,
+                        "avg_age": 67.8,
+                        "avg_treatment_months": 30.2,
+                        "pct_female": 43.2
+                    },
+                    "children": [
+                        {
+                            "name": "Metoprolol",
+                            "kpis": {
+                                "patient_count": 12300,
+                                "avg_age": 67.8,
+                                "avg_treatment_months": 30.2,
+                                "pct_female": 43.2
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "ACE Inhibitor",
+                    "kpis": {
+                        "patient_count": 9880,
+                        "avg_age": 66.9,
+                        "avg_treatment_months": 26.7,
+                        "pct_female": 45.3
+                    },
+                    "children": [
+                        {
+                            "name": "Lisinopril",
+                            "kpis": {
+                                "patient_count": 9880,
+                                "avg_age": 66.9,
+                                "avg_treatment_months": 26.7,
+                                "pct_female": 45.3
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "COPD",
+            "kpis": {
+                "patient_count": 14920,
+                "avg_age": 63.82,
+                "avg_treatment_months": 31.23,
+                "pct_female": 48.67
+            },
+            "children": [
+                {
+                    "name": "Beta Blocker",
+                    "kpis": {
+                        "patient_count": 8900,
+                        "avg_age": 64.1,
+                        "avg_treatment_months": 32.0,
+                        "pct_female": 47.9
+                    },
+                    "children": [
+                        {
+                            "name": "Metoprolol",
+                            "kpis": {
+                                "patient_count": 8900,
+                                "avg_age": 64.1,
+                                "avg_treatment_months": 32.0,
+                                "pct_female": 47.9
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "ACE Inhibitor",
+                    "kpis": {
+                        "patient_count": 6020,
+                        "avg_age": 63.4,
+                        "avg_treatment_months": 30.1,
+                        "pct_female": 49.8
+                    },
+                    "children": [
+                        {
+                            "name": "Lisinopril",
+                            "kpis": {
+                                "patient_count": 6020,
+                                "avg_age": 63.4,
+                                "avg_treatment_months": 30.1,
+                                "pct_female": 49.8
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Depression",
+            "kpis": {
+                "patient_count": 10840,
+                "avg_age": 44.2,
+                "avg_treatment_months": 11.8,
+                "pct_female": 64.2
+            },
+            "children": [
+                {
+                    "name": "SSRI",
+                    "kpis": {
+                        "patient_count": 10840,
+                        "avg_age": 44.2,
+                        "avg_treatment_months": 11.8,
+                        "pct_female": 64.2
+                    },
+                    "children": [
+                        {
+                            "name": "Sertraline",
+                            "kpis": {
+                                "patient_count": 10840,
+                                "avg_age": 44.2,
+                                "avg_treatment_months": 11.8,
+                                "pct_female": 64.2
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Atrial Fibrillation",
+            "kpis": {
+                "patient_count": 6840,
+                "avg_age": 69.1,
+                "avg_treatment_months": 35.4,
+                "pct_female": 41.8
+            },
+            "children": [
+                {
+                    "name": "Anticoagulant",
+                    "kpis": {
+                        "patient_count": 6840,
+                        "avg_age": 69.1,
+                        "avg_treatment_months": 35.4,
+                        "pct_female": 41.8
+                    },
+                    "children": [
+                        {
+                            "name": "Apixaban",
+                            "kpis": {
+                                "patient_count": 6840,
+                                "avg_age": 69.1,
+                                "avg_treatment_months": 35.4,
+                                "pct_female": 41.8
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+};
+// __HIERARCHY_DATA_END__
+
+// ============================================================
+//  RENDERER
+// ============================================================
+(function () {
+
+    /* ── helpers ─────────────────────────────────────── */
+    function fmt(val, type) {
+        if (val === null || val === undefined) return "—";
+        switch (type) {
+            case "integer": return d3.format(",")(Math.round(val));
+            case "decimal1": return d3.format(".1f")(val);
+            case "decimal2": return d3.format(".2f")(val);
+            case "pct":     return d3.format(".1f")(val) + "%";
+            default:        return val;
+        }
+    }
+
+    function resolveColor(name, fallback) {
+        const entry = COLOR_MAP[name];
+        if (entry) return { fill: entry.light, stroke: entry.dark, display: entry.display };
+        return { fill: fallback || "#4f7cff", stroke: "#2a4fc2", display: name };
+    }
+
+    // Auto-assign fallback colors for unknown nodes
+    const FALLBACK_PALETTE = [
+        "#4f9cf6","#f97b5a","#a78bfa","#34d399","#fbbf24","#f472b6",
+        "#38bdf8","#fb923c","#c084fc","#4ade80","#facc15","#e879f9"
+    ];
+    const _fbCache = {};
+    let _fbIdx = 0;
+    function fallbackColor(name) {
+        if (!_fbCache[name]) {
+            _fbCache[name] = FALLBACK_PALETTE[_fbIdx % FALLBACK_PALETTE.length];
+            _fbIdx++;
+        }
+        return _fbCache[name];
+    }
+
+    /* ── layout constants ─────────────────────────────── */
+    const container = document.getElementById("chart-container");
+    const tooltip   = document.getElementById("tooltip");
+    let W, H;
+
+    function getSize() {
+        const rect = container.getBoundingClientRect();
+        W = rect.width  || 800;
+        H = rect.height || 580;
+    }
+
+    /* ── build D3 hierarchy ───────────────────────────── */
+    function buildHierarchy(data) {
+        return d3.hierarchy(data)
+            .sum(d => d.children ? 0 : (d.kpis?.[CHART_CONFIG.size_metric] ?? 0))
+            .sort((a, b) => b.value - a.value);
+    }
+
+    /* ── color resolution per node ────────────────────── */
+    function nodeColor(d) {
+        // depth 0 = root (invisible), depth 1 = first level circles
+        const name = d.data.name;
+        const fb   = fallbackColor(name);
+        return resolveColor(name, fb);
+    }
+
+    /* ── state ────────────────────────────────────────── */
+    let currentFocus = null;  // currently zoomed node
+    let rootNode     = null;
+    let packLayout   = null;
+    let svgEl        = null;
+    let gEl          = null;
+
+    /* ── breadcrumb ────────────────────────────────────── */
+    function updateBreadcrumb(node) {
+        const bc  = document.getElementById("breadcrumb");
+        const path = node ? node.ancestors().reverse() : [];
+        bc.innerHTML = "";
+
+        path.forEach((d, i) => {
+            if (i < path.length - 1) {
+                const span = document.createElement("span");
+                span.className = "bc-item";
+                span.textContent = d.data.name;
+                span.dataset.depth = i;
+                span.addEventListener("click", () => zoomTo(d));
+                bc.appendChild(span);
+                const sep = document.createElement("span");
+                sep.className = "bc-sep";
+                sep.textContent = " / ";
+                bc.appendChild(sep);
+            } else {
+                const span = document.createElement("span");
+                span.className = "bc-current";
+                span.textContent = d.data.name;
+                bc.appendChild(span);
+            }
+        });
+    }
+
+    /* ── stats bar ─────────────────────────────────────── */
+    function updateStats(node) {
+        const statsBar = document.getElementById("stats-bar");
+        const kpis = node.data.kpis || {};
+        statsBar.innerHTML = CHART_CONFIG.kpi_cols.map(col => {
+            const val   = kpis[col];
+            const label = CHART_CONFIG.kpi_labels[col] || col;
+            const type  = CHART_CONFIG.kpi_format[col] || "integer";
+            return `<div class="stat-pill">
+                <span class="stat-label">${label}</span>
+                <span class="stat-value">${val !== undefined ? fmt(val, type) : "—"}</span>
+            </div>`;
+        }).join("");
+    }
+
+    /* ── legend ─────────────────────────────────────────── */
+    function updateLegend(visibleNames) {
+        const leg = document.getElementById("legend");
+        leg.innerHTML = `<div class="legend-title">Categories</div>`;
+        const seen = new Set();
+        visibleNames.forEach(name => {
+            if (seen.has(name)) return;
+            seen.add(name);
+            const col = nodeColor({ data: { name } });
+            const item = document.createElement("div");
+            item.className = "legend-item";
+            item.innerHTML = `<div class="legend-swatch" style="background:${col.fill}"></div>
+                              <span>${col.display}</span>`;
+            leg.appendChild(item);
+        });
+    }
+
+    /* ── zoom ────────────────────────────────────────────── */
+    function zoomTo(d) {
+        currentFocus = d;
+        updateBreadcrumb(d);
+        updateStats(d);
+
+        const btn = document.getElementById("zoom-out-btn");
+        btn.className = d.depth > 0 ? "zoom-out-btn visible" : "zoom-out-btn";
+
+        const k  = (Math.min(W, H) * 0.96) / (d.r * 2);
+        const tx = W / 2 - d.x * k;
+        const ty = H / 2 - d.y * k;
+
+        gEl.transition()
+            .duration(650)
+            .ease(d3.easeCubicInOut)
+            .attr("transform", `translate(${tx},${ty}) scale(${k})`);
+
+        // Show/hide labels depending on zoom level
+        gEl.selectAll(".node text")
+            .transition().duration(400)
+            .style("opacity", nd => {
+                const visible = nd.parent === d || nd === d;
+                return visible ? 1 : 0;
+            });
+    }
+
+    /* ── draw ───────────────────────────────────────────── */
+    function draw() {
+        getSize();
+        if (svgEl) svgEl.remove();
+
+        const root = buildHierarchy(HIERARCHY_DATA);
+        rootNode = root;
+        currentFocus = root;
+
+        packLayout = d3.pack()
+            .size([W * 0.96, H * 0.96])
+            .padding(d => d.depth === 0 ? 8 : d.depth === 1 ? 5 : 3);
+
+        packLayout(root);
+
+        // offset to center
+        const ox = (W - W * 0.96) / 2;
+        const oy = (H - H * 0.96) / 2;
+
+        svgEl = d3.select("#chart-container")
+            .append("svg")
+            .attr("width",  W)
+            .attr("height", H);
+
+        gEl = svgEl.append("g")
+            .attr("transform", `translate(${ox + W*0.48},${oy + H*0.48})`);
+
+        // Radial subtle gradient bg
+        const defs = svgEl.append("defs");
+        const rg = defs.append("radialGradient")
+            .attr("id","bgGrad")
+            .attr("cx","50%").attr("cy","50%").attr("r","50%");
+        rg.append("stop").attr("offset","0%")
+            .attr("stop-color","#1a1e2e").attr("stop-opacity",1);
+        rg.append("stop").attr("offset","100%")
+            .attr("stop-color","#0f1117").attr("stop-opacity",1);
+        svgEl.insert("rect","g")
+            .attr("width",W).attr("height",H)
+            .attr("fill","url(#bgGrad)")
+            .style("cursor","default")
+            .on("click", () => zoomTo(root));
+
+        // Nodes
+        const nodes = gEl.selectAll(".node")
+            .data(root.descendants())
+            .join("g")
+            .attr("class", "node")
+            .attr("transform", d => `translate(${d.x - W*0.48 + ox},${d.y - H*0.48 + oy})`);
+
+        nodes.append("circle")
+            .attr("r", d => d.r)
+            .attr("class", d => d.children ? "branch" : "leaf")
+            .attr("fill", d => {
+                if (d.depth === 0) return "transparent";
+                const col = nodeColor(d);
+                return col.fill;
+            })
+            .attr("fill-opacity", d => {
+                if (d.depth === 0) return 0;
+                if (d.children)   return 0.08 + (0.06 * d.depth);
+                return 0.82;
+            })
+            .attr("stroke", d => {
+                if (d.depth === 0) return "none";
+                const col = nodeColor(d);
+                return col.stroke;
+            })
+            .attr("stroke-opacity", d => d.children ? 0.35 : 0.6)
+            .on("click", (event, d) => {
+                event.stopPropagation();
+                if (d.children) {
+                    zoomTo(d);
+                } else {
+                    zoomTo(d.parent || root);
+                }
+            })
+            .on("mousemove", (event, d) => {
+                if (d.depth === 0) return;
+                showTooltip(event, d);
+            })
+            .on("mouseleave", () => hideTooltip());
+
+        // Branch labels (shown when at parent level)
+        nodes.filter(d => d.children && d.depth > 0)
+            .append("text")
+            .attr("class", "label-branch")
+            .style("font-size", d => Math.max(9, Math.min(16, d.r * 0.22)) + "px")
+            .style("opacity", d => d.depth === 1 ? 1 : 0)
+            .each(function(d) {
+                const col  = nodeColor(d);
+                const name = col.display;
+                const r    = d.r * 0.7;
+                const fs   = Math.max(9, Math.min(16, d.r * 0.22));
+                const maxW = r * 2;
+                const charsPerLine = Math.floor(maxW / (fs * 0.6));
+                const words = name.split(" ");
+                const lines = [];
+                let line = "";
+                words.forEach(w => {
+                    if ((line + " " + w).trim().length <= charsPerLine) {
+                        line = (line + " " + w).trim();
+                    } else {
+                        if (line) lines.push(line);
+                        line = w;
+                    }
+                });
+                if (line) lines.push(line);
+                const el = d3.select(this);
+                el.selectAll("tspan").data(lines).join("tspan")
+                    .attr("x", 0)
+                    .attr("dy", (_, i) => i === 0 ? `${-(lines.length - 1) * 0.6}em` : "1.2em")
+                    .text(t => t);
+            });
+
+        // Leaf labels
+        nodes.filter(d => !d.children)
+            .append("text")
+            .attr("class", "label-leaf")
+            .style("font-size", d => Math.max(8, Math.min(13, d.r * 0.38)) + "px")
+            .style("opacity", 0)
+            .each(function(d) {
+                const col  = nodeColor(d);
+                const name = col.display;
+                const fs   = Math.max(8, Math.min(13, d.r * 0.38));
+                if (d.r < 12) return; // too small, skip
+                const el = d3.select(this);
+                el.text(name);
+            });
+
+        // Update stats & legend at root
+        updateStats(root);
+        updateBreadcrumb(root);
+
+        const visibleNames = root.descendants()
+            .filter(d => d.depth === 1)
+            .map(d => d.data.name);
+        updateLegend(visibleNames);
+
+        // Initial zoom-to-root
+        zoomTo(root);
+
+        // Zoom out button
+        document.getElementById("zoom-out-btn").addEventListener("click", () => {
+            if (currentFocus && currentFocus.parent) zoomTo(currentFocus.parent);
+            else zoomTo(root);
+        });
+    }
+
+    /* ── tooltip ─────────────────────────────────────────── */
+    function showTooltip(event, d) {
+        const col   = nodeColor(d);
+        const kpis  = d.data.kpis || {};
+        const path  = d.ancestors().reverse().slice(1).map(a => a.data.name).join(" › ");
+        const hasChildren = !!d.children;
+
+        let rows = CHART_CONFIG.kpi_cols.map(col_name => {
+            const val   = kpis[col_name];
+            if (val === undefined) return "";
+            const label = CHART_CONFIG.kpi_labels[col_name] || col_name;
+            const type  = CHART_CONFIG.kpi_format[col_name] || "integer";
+            return `<div class="tt-row">
+                <span class="tt-label">${label}</span>
+                <span class="tt-value">${fmt(val, type)}</span>
+            </div>`;
+        }).join("");
+
+        const hint = hasChildren
+            ? `<div class="tt-hint">Click to zoom in</div>`
+            : `<div class="tt-hint">Click parent to zoom out</div>`;
+
+        tooltip.innerHTML = `
+            <div class="tt-name" style="color:${col.fill}">${col.display}</div>
+            <div class="tt-path">${path}</div>
+            ${rows}
+            ${hint}
+        `;
+        tooltip.classList.add("visible");
+        positionTooltip(event);
+    }
+
+    function hideTooltip() {
+        tooltip.classList.remove("visible");
+    }
+
+    function positionTooltip(event) {
+        const tw = tooltip.offsetWidth  || 260;
+        const th = tooltip.offsetHeight || 120;
+        let x = event.clientX + 16;
+        let y = event.clientY + 16;
+        if (x + tw > window.innerWidth)  x = event.clientX - tw - 16;
+        if (y + th > window.innerHeight) y = event.clientY - th - 16;
+        tooltip.style.left = Math.max(0, x) + "px";
+        tooltip.style.top  = Math.max(0, y) + "px";
+    }
+
+    document.addEventListener("mousemove", e => {
+        if (tooltip.classList.contains("visible")) positionTooltip(e);
+    });
+
+    /* ── title ───────────────────────────────────────────── */
+    document.getElementById("chart-title").textContent   = CHART_CONFIG.title;
+    document.getElementById("chart-subtitle").textContent = CHART_CONFIG.subtitle;
+
+    /* ── init + resize ───────────────────────────────────── */
+    draw();
+    let _resizeTimer;
+    window.addEventListener("resize", () => {
+        clearTimeout(_resizeTimer);
+        _resizeTimer = setTimeout(draw, 160);
+    });
+
+    /* ── public API (callable from Python-injected page) ─── */
+    window.setChartTheme = function(isDark) {
+        document.documentElement.style.setProperty("--bg",      isDark ? "#0f1117" : "#f4f6fb");
+        document.documentElement.style.setProperty("--surface", isDark ? "#181b24" : "#ffffff");
+        document.documentElement.style.setProperty("--text-primary", isDark ? "#e8eaf0" : "#1a1d2e");
+        document.documentElement.style.setProperty("--text-muted",   isDark ? "#7a7f96" : "#5a5f78");
+        draw();
+    };
+
+})();
+</script>
+</body>
+</html>
