@@ -295,7 +295,7 @@ def convert_markdown_to_html(
         str: Path to the generated HTML file
     """
 
-    # ── Load column formats from Excel sheet ──
+    # ── Load column formats from Excel sheet ────────────────────────────
     _global_column_formats = {}
     _override_column_formats = {}
     if format_file is not None:
@@ -874,7 +874,7 @@ def convert_markdown_to_html(
                     }
 
             def _fmt_cell(val, col_name):
-                """Format a cell value for display, respecting format_file config.."""
+                """Format a cell value for display, respecting format_file config."""
                 meta = col_meta.get(str(col_name), {})
                 if val is None or (isinstance(val, float) and _pd.isna(val)):
                     return ""
@@ -939,14 +939,9 @@ def convert_markdown_to_html(
             for col in df.columns:
                 col_lower = str(col).lower()
                 fa = ' data-freeze="true"' if col_lower in freeze_set else ""
-                meta = col_meta.get(str(col), {})
-                ws = (
-                    "white-space:normal;" if meta.get("wrap") else "white-space:nowrap;"
-                )
-                col_width = meta.get("width_style", "")
                 thead_html += (
                     f'<th data-col="{col_lower}"{fa} '
-                    f'style="{ws}{col_width}">'
+                    f'style="white-space:nowrap;">'
                     f'{col}<span class="dt-sort-ind">⇅</span></th>'
                 )
             thead_html += "</tr>"
@@ -979,7 +974,7 @@ window.dtTotalRows_{query_id} = {total_rows};
 </div>
 <div style="overflow-x:auto;overflow-y:auto;max-height:500px;border:1px solid var(--border-color);border-radius:6px;
             scrollbar-width:thin;scrollbar-color:rgba(120,120,120,0.3) transparent;">
-<table id="dt-{query_id}" style="width:100%;border-collapse:collapse;table-layout:auto;font-family:{font_family};font-size:{font_size};">
+<table id="dt-{query_id}" style="border-collapse:collapse;font-family:{font_family};font-size:{font_size};">
 <thead id="dt-head-{query_id}" style="position:sticky;top:0;z-index:10;background:var(--sidebar-bg);">
 {thead_html}
 </thead>
@@ -991,8 +986,10 @@ window.dtTotalRows_{query_id} = {total_rows};
 </div>
 <style>
 #dt-{query_id} th {{
-    text-align:left;font-weight:600;cursor:pointer;user-select:none;padding:{ds["th"]};
+    text-align:left;font-weight:600;cursor:pointer;user-select:none;
+    padding:8px 20px 8px 8px;
     border-bottom:2px solid var(--border-color);background:var(--sidebar-bg);
+    white-space:nowrap;
 }}
 #dt-{query_id} th:hover {{ background:var(--hover-color); }}
 #dt-{query_id} td {{ padding:{ds["td"]}; border-bottom:1px solid var(--border-color); }}
@@ -1446,21 +1443,28 @@ window.dtTotalRows_{query_id} = {total_rows};
                     html_lines = []
                     in_table = True
 
-                    # Collect HTML content until we find a closing tag or end of table
+                    # Track nesting depth to handle nested div/table structures
+                    depth = 0
+
+                    # Collect HTML content respecting nesting depth
                     while i < len(lines):
                         current_line = lines[i]
                         html_lines.append(current_line)
+                        cl = current_line.lower()
 
-                        # Check for closing tags that might end our HTML block
-                        if (
-                            "</table>" in current_line.lower()
-                            or "</div>" in current_line.lower()
-                        ):
-                            i += 1
+                        # Count opening tags (increase depth)
+                        depth += cl.count("<div") + cl.count("<table")
+                        # Count closing tags (decrease depth)
+                        depth -= cl.count("</div>") + cl.count("</tables>")
+
+                        i += 1
+
+                        # When depth reaches 0, the outermost block is closed
+                        if depth <= 0:
                             break
 
                         i += 1
-                        # If next line doesn't look like HTML continuation, break
+                        # Safety: if next line doesn't look like HTML continuation, break
                         if i < len(lines) and not (
                             lines[i].strip().startswith("<")
                             or lines[i].strip() == ""
@@ -1473,6 +1477,59 @@ window.dtTotalRows_{query_id} = {total_rows};
 
                     # Parse HTML table into proper table structure if it's a table
                     if "<table" in html_content.lower():
+                        # Apply column formats from format_file if loaded
+                        if _global_column_formats or _override_column_formats:
+                            try:
+                                _soup = BeautifulSoup(html_content, "html.parser")
+                                _tbl = _soup.find("table")
+                                if _tbl:
+                                    _ths = _tbl.find("thead")
+                                    _col_names = []
+                                    if _ths:
+                                        # Get all <th> from the LAST header row (handles multi-row headers)
+                                        _header_rows = _ths.find_all("tr")
+                                        _last_hdr = _header_rows[-1] if _header_rows else _ths
+                                        _all_ths = _last_hdr.find_all("th")
+                                        # Pandas adds an empty <th> for the index; count <td> in body
+                                        # to determine how many data columns there are
+                                        _tbody = _tbl.find("tbody")
+                                        _first_body_row = (_tbody.find("tr") if _tbody else None) or _tbl.find_all("tr")[1] if len(_tbl.find_all("tr")) > 1 else None
+                                        _n_td = len(_first_body_row.find_all("td")) if _first_body_row else 0
+                                        # Take only the last N <th> matching the number of <td> data cells
+                                        if _n_td > 0 and len(_all_ths) > _n_td:
+                                            _col_names = [th.get_text(strip=True) for th in _all_ths[-_n_td:]]
+                                        else:
+                                            _col_names = [th.get_text(strip=True) for th in _all_ths]
+                                    
+                                    if _col_names:
+                                        _tbody_el = _tbl.find("tbody")
+                                        _body_rows = _tbody_el.find_all("tr") if _tbody_el else _tbl.find_all("tr")[1:]
+                                        for _tr in _body_rows:
+                                            _tds = _tr.find_all("td")
+                                            for _td_idx, _td in enumerate(_tds):
+                                                if _td_idx >= len(_col_names):
+                                                    break
+                                                _cn = _col_names[_td_idx].lower()
+                                                _fmt_match = _global_column_formats.get(_cn)
+                                                if _fmt_match:
+                                                    _raw = _td.get_text(strip=True)
+                                                    try:
+                                                        if _fmt_match.startswith("%"):
+                                                            import pandas as _pd_fmt
+                                                            _td.string = _pd_fmt.to_datetime(_raw).strftime(_fmt_match)
+                                                        else:
+                                                            # Try numeric conversion
+                                                            try:
+                                                                _num = float(_raw.replace(",", ""))
+                                                            except (ValueError, AttributeError):
+                                                                _num = _raw
+                                                            _td.string = _fmt_match.format(_num)
+                                                    except Exception:
+                                                        pass
+                                    html_content = str(_soup)
+                            except Exception:
+                                pass
+
                         # Clean up the HTML table
                         html_content = re.sub(r'style="[^"]*"', "", html_content)
                         html_content = html_content.replace(
@@ -1525,6 +1582,11 @@ window.dtTotalRows_{query_id} = {total_rows};
                                         else "",
                                     }
                                 )
+                i += 1
+                continue
+
+            # Skip orphaned closing HTML tags (leftover from nested div/table wrappers)
+            elif line.strip().lower() in ("</div>", "</table>", "</span"):
                 i += 1
                 continue
 
@@ -2710,7 +2772,8 @@ window.dtTotalRows_{query_id} = {total_rows};
 
         .html-content table {{
             border-collapse: collapse;
-            width: 100%;
+            width: auto;
+            min-width: 40%;
             margin: 15px 0;
             font-size: 13px;
         }}
@@ -3428,6 +3491,15 @@ window.dtTotalRows_{query_id} = {total_rows};
             var cols   = window['dtFullCols_' + queryId];
             var total  = window['dtTotalRows_' + queryId] || 0;
 
+            // Determine visible columns (respects column filter)
+            function getVisibleCols() {
+                var table = document.getElementById('dt-' + queryId);
+                if (!table) return cols;
+                var visHeaders = Array.from(table.querySelectorAll('thead th:not(.dt-col-hidden)'));
+                if (visHeaders.length === 0 || visHeaders.length === cols.length) return cols;
+                return visHeaders.map(function(th){return th.getAttribute('data-col) || '';});
+            }
+
             if (full && cols) {
                 if (!term) {
                     tbody.innerHTML = '';
@@ -3438,11 +3510,35 @@ window.dtTotalRows_{query_id} = {total_rows};
                     rcount.textContent = 'Showing ' + show.toLocaleString() + ' of ' + total.toLocaleString() + ' rows';
                     return;
                 }
-                var filtered = full.filter(function(row) {
-                    return cols.some(function(c) {
-                        return String(row[c] !== null && row[c] !== undefined ? row[c] : '').toLowerCase().includes(term);
+                var filtered;
+                if (term.includes(':')) {
+                    // Column-specific search e.g. "radio:245"
+                    var parts = term.split(':');
+                    var colSearch = parts[0].trim();
+                    var valSearch = parts.slice(1).join(':').trim();
+                    var matchedCol = cols.find(function(c){return c.toLowerCase() === colSearch;});
+                    if (!matchedCol) matchedCol = cols.find(function(c){return c.toLowerCase().includes(colSearch);});
+                    if (!matchedCol) {
+                        tbody.innerHTML = '<tr><td colspan="' + cols.length + '" style="text-align:center;padding:16px;opacity:0.5;">Column \u201c' + colSearch + '\u201d not found</td></tr>';
+                        rcount.textContent = 'No results';
+                        return;
+                    }
+                    filtered = full.filter(function(row) {
+                        return String(row[matchedCol] !== null && row[matchedCol] !== undefined ? row[matchedCol] : '').toLowerCase().includes(valSearch);
                     });
-                });
+                } else {
+                    // General search - multi-word (all words must match across visible columns)
+                    var searchCols = getVisibleCols();
+                    var words = term.split(/\s+/).filter(function(w){return w;});
+                    filtered = full.filter(function(row) {
+                        return words.every(function(word) {
+                            return searchCols.some(function(c) {
+                                return String(row[c] !== null && row[c] !== undefined ? row[c] : '').toLowerCase().includes(word);
+                            });
+                        });
+                    });
+                }
+
                 tbody.innerHTML = '';
                 if (!filtered.length) {
                     tbody.innerHTML = '<tr><td colspan="' + cols.length + '" style="text-align:center;padding:16px;opacity:0.5;">No results for \u201c' + term + '\u201d</td></tr>';
@@ -3494,16 +3590,18 @@ window.dtTotalRows_{query_id} = {total_rows};
         // ── Datatable: column filter ──────────────────────────────────────
         function dtFilterCols(queryId) {
             var box     = document.querySelector('#dt-wrap-' + queryId + ' input[placeholder^="\\uD83D\\uDD0D"]');
-            var term    = box ? box.value.trim().toLowerCase() : '';
+            var rawTerm    = box ? box.value.trim().toLowerCase() : '';
             var ccount  = document.getElementById('dt-ccount-' + queryId);
             var table   = document.getElementById('dt-' + queryId);
             if (!table) return;
             var headers = Array.from(table.querySelectorAll('thead th'));
             var total   = headers.length;
             var vis     = 0;
+            // Support comma-separated multi-term filter
+            var terms = rawTerm ? rawTerm.split(',').map(function(t){return t.trim();}).filter(function(t){return t;}) : [];
             headers.forEach(function(th, i) {
                 var col   = (th.getAttribute('data-col') || '').toLowerCase();
-                var match = !term || col.includes(term);
+                var match = terms.length === 0 || terms.some(function(t){return col.includes(t);});
                 th.classList.toggle('dt-col-hidden', !match);
                 if (match) vis++;
                 Array.from(table.querySelectorAll('tbody tr')).forEach(function(row) {
