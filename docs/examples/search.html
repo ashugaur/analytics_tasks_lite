@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>File Search</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+    --bg: #ffffff; --text: #333333; --sidebar-bg: #f8f9fa;
+    --accent: #007bff; --border: #dee2e6; --hover: #f1f3f5;
+    --code-bg: #f5f5f5; --dim: #666666; --link: #0055cc;
+    --hl-bg: #fff3b0; --hl-fg: #333;
+    --fh-bg: #f5f5f5; --fh-border: #ddd; --tl-border: #eee;
+}
+[data-theme="dark"] {
+    --bg: #1e1e1e; --text: #e0e0e0; --sidebar-bg: #2d2d2d;
+    --accent: #4a9eff; --border: #444444; --hover: #383838;
+    --code-bg: #2a2a2a; --dim: #888888; --link: #826a65;
+    --hl-bg: #3a3a00; --hl-fg: #e8e857;
+    --fh-bg: #252525; --fh-border: #3a3a3a; --tl-border: #2a2a2a;
+}
+body { background: var(--bg); color: var(--text); font-family: Arial, sans-serif;
+  font-size: 14px; line-height: 1.6; transition: background-color 0.3s, color 0.3s; }
+
+.top-bar { display: flex; align-items: center; gap: 8px; padding: 10px 16px;
+  border-bottom: 1px solid var(--border); flex-wrap: wrap; position: sticky; top: 0; z-index: 100; background: var(--bg); }
+.top-bar .logo { font-size: 14px; font-weight: bold; color: var(--accent); white-space: nowrap; }
+.top-bar .stats { font-size: 11px; color: var(--dim); white-space: nowrap; }
+#searchInput { flex: 1; min-width: 150px; padding: 6px 10px; border: 1px solid var(--border);
+  border-radius: 4px; background: var(--bg); color: var(--text); font-size: 13px; }
+#searchInput:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(74,158,255,0.15); }
+.btn { padding: 5px 10px; border-radius: 4px; border: 1px solid var(--border);
+  background: var(--code-bg); color: var(--text); cursor: pointer; font-size: 12px; white-space: nowrap; }
+.btn:hover { border-color: var(--accent); }
+.btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.btn-search { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 600; }
+.btn-search:hover { opacity: 0.9; }
+
+.filter-select { padding: 5px 6px; border-radius: 4px; border: 1px solid var(--border);
+  background: var(--bg); color: var(--text); font-size: 12px; max-width: 120px; }
+.filter-select:focus { outline: none; border-color: var(--accent); }
+
+.main-content { max-width: 1200px; margin: 0 auto; padding: 12px 16px; }
+#status { font-size: 12px; color: var(--dim); margin-bottom: 8px; }
+.file-section { margin-bottom: 20px; }
+.file-header { background: var(--fh-bg); border-left: 3px solid var(--link);
+  padding: 6px 12px; margin-bottom: 1px; border-bottom: 1px solid var(--fh-border);
+  display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; flex-wrap: wrap;}
+.file-header:hover { background: var(--hover); }
+.file-header .ext { font-size: 10px; padding: 1px 5px; border-radius: 3px;
+  background: var(--accent); color: #fff; font-weight: 600; }
+.file-header .path { font-size: 12px; font-family: Consolas, monospace; word-break: break-all; flex: 1; }
+.file-header .date { font-size: 11px; color: var(--dim); white-space: nowrap; }
+.file-header .inner-path { font-size: 11px; font-family: Consolas, monospace; color: var(--accent); word-break: break-all; flex-basis: 100%; padding-left: 2px; margin-top: 2px; }
+
+.text-line { padding: 3px 12px; border-bottom: 1px solid var(--tl-border);
+  font-size: 13px; white-space: pre-wrap; word-break: break-word; display: flex; gap: 6px; }
+.text-line:hover { background: var(--hover); }
+.ln { color: var(--dim); font-size: 11px; white-space: nowrap; min-width: 36px; text-align: right; flex-shrink: 0; user-select: none; }
+.text-content { flex: 1; font-family: Consolas, monospace; font-size: 13px; }
+mark { background: var(--hl-bg); color: var(--hl-fg); padding: 0 2px; border-radius: 2px; }
+.pagination { display: flex; align-items: center; justify-content: center; gap: 4px; margin: 12px 0; flex-wrap: wrap; }
+.pagination .btn { min-width: 30px; text-align: center; padding: 4px 8px; }
+.pagination .page-info { font-size: 12px; color: var(--dim); margin: 0 8px; }
+.pagination .btn[disabled] { opacity: 0.3; pointer-events: none; }
+
+.empty { text-align: center; padding: 40px; color: var(--dim); }
+</style>
+</head>
+<body data-theme="dark">
+
+<div class="top-bar">
+  <span class="logo">&#128269;</span>
+  <span class="stats" id="stats"></span>
+  <input type="text" id="searchInput" placeholder="Search..." autofocus>
+  <button class="btn btn-search" id="searchBtn">Search</button>
+  <button class="btn" id="modeBtn" title="Toggle contains/regex">Contains</button>
+  <select class="filter-select" id="extFilter" title="Extension filter"><option value="">All ext</option></select>
+  <select class="filter-select" id="searchColumn" title="Search in column"></select>
+  <span class="stats">Path filter</span>
+  <select class="filter-select" id="pathFilterMode" title="Path filter mode">
+    <option value="include">include</option>
+    <option value="exclude">exclude</option>
+  </select>
+  <input type="text" id="pathFilter" class="filter-select" placeholder="path..." style="min-width:100px" title="Filter by path">
+  <button class="btn" onclick="collapseAll()" title="Collapse all">&#8722;</button>
+  <button class="btn" onclick="expandAll()" title="Expand all">&#43;</button>
+</div>
+
+<div class="main-content">
+  <div id="status"></div>
+  <div id="results"></div>
+  <div class="pagination" id="pagination"></div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+let currentPage = 1, mode = 'contains';
+
+function toggleTheme() {
+  const t = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  document.body.setAttribute('data-theme', t);
+  localStorage.setItem('fs-theme', t);
+}
+(function() { const s = localStorage.getItem('fs-theme'); if (s) document.body.setAttribute('data-theme', s); })();
+
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+  if (e.key === 't' || e.key === 'T') { toggleTheme(); e.preventDefault(); }
+  if (e.key === 'f' || e.key === 'F') { $('#searchInput').focus(); e.preventDefault(); }
+});
+
+async function init() {
+  const [stats, cols] = await Promise.all([api('/api/stats'), api('/api/columns')]);
+  $('#stats').textContent = fmt(stats.rows) + ' rows \u00b7 ' + fmt(stats.files) + ' files';
+  stats.extensions.forEach(e => {
+    const o = document.createElement('option');
+    o.value = e.ext; o.textContent = e.ext + ' (' + e.files + ')';
+    $('#extFilter').appendChild(o);
+  });
+  cols.searchable.forEach(c => {
+    const o = document.createElement('option');
+    o.value = c; o.textContent = c; if (c === 'text') o.selected = true;
+    $('#searchColumn').appendChild(o);
+  });
+
+}
+
+
+
+async function doSearch(page) {
+  page = page || 1;
+  const q = $('#searchInput').value.trim();
+  if (!q) return;
+  currentPage = page;
+  const p = new URLSearchParams();
+  p.set('q', q); p.set('mode', mode); p.set('page', page); p.set('per_page', '50');
+  const ext = $('#extFilter').value;
+  if (ext) p.set('ext', ext);
+  const sc = $('#searchColumn').value;
+  if (sc && sc !== 'text') p.set('search_column', sc);
+  const pf = $('#pathFilter').value.trim();
+  if (pf) {
+    p.set('path', pf);
+    p.set('path_mode', $('#pathFilterMode').value);
+  }
+
+
+  $('#results').innerHTML = '<div class="empty">Searching...</div>';
+  $('#pagination').innerHTML = ''; $('#status').textContent = '';
+
+  const data = await api('/api/search?' + p.toString());
+  if (data.error) { $('#results').innerHTML = '<div class="empty">Error: ' + esc(data.error) + '</div>'; return; }
+  $('#status').textContent = fmt(data.total_files) + ' files \u00b7 page ' + data.page + (data.has_more ? '+' : '') + ' \u00b7 ' + data.time_ms + 'ms';
+  renderResults(data);
+  renderPagination(data);
+}
+
+function renderResults(data) {
+  if (!data.results.length) { $('#results').innerHTML = '<div class="empty">No results.</div>'; return; }
+  var groups = new Map();
+  data.results.forEach(function(r) {
+    var key = r.unc + '\x00' + (r.inner || '');
+    if (!groups.has(key)) groups.set(key, { unc: r.unc, ext: r.ext, date: r.date, inner: r.inner || '', rows: [] });
+    groups.get(key).rows.push(r);
+  });
+  var h = '';
+  groups.forEach(function(g) {
+    h += '<div class="file-section"><div class="file-header" data-unc"' + esc(g.unc) + '" onclick="toggleFileSection(this)">';
+    h += '<span class="ext">' + esc(g.ext || '') + '</span>';
+    h += '<span class="path">' + esc(g.unc) + '</span>';
+    h += '<span class="date">' + (g.date || '') + '</span>';
+    if (g.inner) h += '<span class="inner-path">&#128196; ' + esc(g.inner) + '</span>';
+    h += '</div><div class="file-rows">';
+    g.rows.forEach(function(r) {
+      var m = r.line ? '#' + r.line : '';
+      if (r.page) m += ' p' + r.page;
+      if (r.sheet) m += ' ' + esc(String(r.sheet));
+      h += '<div class="text-line"><span class="ln">' + m + '</span><span class="text-content">' + highlight(r.text, data.terms) + '</span></div>';
+    });
+    h += '</div></div>';
+  });
+  $('#results').innerHTML = h;
+}
+
+function toggleFileSection(headerEl) {
+  var el = headerEl.nextElementSibling;
+  el.style.display = el.style.display === 'none' ? '' : 'none';
+  copyTextToClipboard(headerEl.dataset.unc || '');
+}
+
+function copyTextToClipboard(text) {
+  if (!text) return;
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).catch(function() { fallbackCopy(text); });
+    return;
+  }
+  fallbackCopy(text);
+}
+
+function fallbackCopy(text) {
+  try {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    ta.style.pointerEvents = 'none';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  } catch (e) {}
+}
+
+function renderPagination(data) {
+  if (data.page <= 1 && !data.has_more) { $('#pagination').innerHTML = ''; return; }
+  var h = '<button class="btn" ' + (data.page<=1?'disabled':'') + ' onclick="doSearch(1)">\u00ab</button>';
+  h += '<button class="btn" ' + (data.page<=1?'disabled':'') + ' onclick="doSearch(' + (data.page-1) + ')">&lsaquo;</button>';
+  h += '<span class="page-info">Page ' + data.page + '</span>';
+  h += '<button class="btn" ' + (!data.has_more?'disabled':'') + ' onclick="doSearch(' + (data.page+1) + ')">&rsaquo;</button>';
+  $('#pagination').innerHTML = h;
+}
+
+function collapseAll() { document.querySelectorAll('.file-rows').forEach(function(el){el.style.display='none';}); }
+function expandAll() { document.querySelectorAll('.file-rows').forEach(function(el){el.style.display='';}); }
+async function api(url) { var r = await fetch(url); return r.json(); }
+function fmt(n) { return Number(n).toLocaleString(); }
+function esc(s) { return s ? s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') : ''; }
+function highlight(text, terms) {
+  if (!text) return '';
+  var s = esc(text);
+  if (!terms || !terms.length) return s;
+  try {
+    var p;
+    if (mode === 'regex') {
+      p = terms[0];
+    } else {
+      p = terms.map(function(t){return t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');}).join('|');
+    }
+    s = s.replace(new RegExp('(' + p + ')','gi'),'<mark>$1</mark>');
+  } catch(e){}
+  return s;
+}
+
+$('#searchInput').addEventListener('keydown', function(e) { if (e.key === 'Enter') doSearch(1); });
+$('#searchBtn').addEventListener('click', function() { doSearch(1); });
+$('#modeBtn').addEventListener('click', function() {
+  mode = mode === 'contains' ? 'regex' : 'contains';
+  $('#modeBtn').textContent = mode === 'contains' ? 'Contains' : 'Regex';
+  $('#modeBtn').classList.toggle('active', mode === 'regex');
+});
+
+init();
+</script>
+</body>
+</html>
