@@ -43,6 +43,7 @@ src/analytics_tasks_lite/slidesjs/slidesjs_helper/transform_to_agenda_items.py
 src/analytics_tasks_lite/slidesjs/tests/check_chart.py
 src/analytics_tasks_lite/slidesjs/tests/check_project.py
 src/analytics_tasks_lite/utils/__init__.py
+src/analytics_tasks_lite/utils/combine_charts.py
 src/analytics_tasks_lite/utils/controlling/__init__.py
 src/analytics_tasks_lite/utils/controlling/log.py
 src/analytics_tasks_lite/utils/controlling/run_py_file.py
